@@ -1,0 +1,152 @@
+[
+    {
+        "date": "01-03-2020",
+        "cases": 10,
+        "type": "confirmed"
+    },
+    {
+        "date": "02-03-2020",
+        "cases": 30,
+        "type": "confirmed"
+    },
+    {
+        "date": "03-03-2020",
+        "cases": 50,
+        "type": "confirmed"
+    },
+    {
+        "date": "04-03-2020",
+        "cases": 70,
+        "type": "confirmed"
+    },
+    {
+        "date": "05-03-2020",
+        "cases": 90,
+        "type": "confirmed"
+    },
+    {
+        "date": "06-03-2020",
+        "cases": 110,
+        "type": "confirmed"
+    },
+    {
+        "date": "07-03-2020",
+        "cases": 130,
+        "type": "confirmed"
+    },
+    {
+        "date": "08-03-2020",
+        "cases": 150,
+        "type": "confirmed"
+    },
+    {
+        "date": "09-03-2020",
+        "cases": 170,
+        "type": "confirmed"
+    },
+    {
+        "date": "10-03-2020",
+        "cases": 190,
+        "type": "confirmed"
+    },
+    {
+        "date": "11-03-2020",
+        "cases": 210,
+        "type": "confirmed"
+    },
+    {
+        "date": "12-03-2020",
+        "cases": 230,
+        "type": "confirmed"
+    },
+    {
+        "date": "13-03-2020",
+        "cases": 250,
+        "type": "confirmed"
+    },
+    {
+        "date": "14-03-2020",
+        "cases": 270,
+        "type": "confirmed"
+    },
+    {
+        "date": "15-03-2020",
+        "cases": 290,
+        "type": "confirmed"
+    },
+    {
+        "date": "16-03-2020",
+        "cases": 310,
+        "type": "confirmed"
+    },
+    {
+        "date": "17-03-2020",
+        "cases": 330,
+        "type": "confirmed"
+    },
+    {
+        "date": "18-03-2020",
+        "cases": 350,
+        "type": "confirmed"
+    },
+    {
+        "date": "19-03-2020",
+        "cases": 370,
+        "type": "confirmed"
+    },
+    {
+        "date": "20-03-2020",
+        "cases": 390,
+        "type": "confirmed"
+    },
+    {
+        "date": "21-03-2020",
+        "cases": 410,
+        "type": "confirmed"
+    },
+    {
+        "date": "22-03-2020",
+        "cases": 430,
+        "type": "confirmed"
+    },
+    {
+        "date": "23-03-2020",
+        "cases": 450,
+        "type": "confirmed"
+    },
+    {
+        "date": "24-03-2020",
+        "cases": 470,
+        "type": "confirmed"
+    },
+    {
+        "date": "25-03-2020",
+        "cases": 490,
+        "type": "confirmed"
+    },
+    {
+        "date": "26-03-2020",
+        "cases": 510,
+        "type": "confirmed"
+    },
+    {
+        "date": "27-03-2020",
+        "cases": 530,
+        "type": "confirmed"
+    },
+    {
+        "date": "28-03-2020",
+        "cases": 550,
+        "type": "confirmed"
+    },
+    {
+        "date": "29-03-2020",
+        "cases": 570,
+        "type": "confirmed"
+    },
+    {
+        "date": "30-03-2020",
+        "cases": 590,
+        "type": "confirmed"
+    }
+]
