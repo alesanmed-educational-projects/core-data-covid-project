@@ -1,18 +1,25 @@
 {
-    // Use IntelliSense para saber los atributos posibles.
-    // Mantenga el puntero para ver las descripciones de los existentes atributos.
-    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Streamlit",
-            "type": "python",
-            "request": "launch",
-            "module": "streamlit.cli",
-            "args": [
-                "run",
-                "${workspaceFolder}/app/main.py",
-            ],
-        }
-    ]
+  // Use IntelliSense para saber los atributos posibles.
+  // Mantenga el puntero para ver las descripciones de los existentes atributos.
+  // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Archivo actual",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Streamlit",
+      "type": "python",
+      "request": "launch",
+      "module": "streamlit.cli",
+      "args": [
+        "run",
+        "${workspaceFolder}/app/main.py",
+      ],
+    }
+  ]
 }
