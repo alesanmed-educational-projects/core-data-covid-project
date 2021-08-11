@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 from typing import Union
 
+from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
+
 
 class PlaceType(Enum):
     COUNTRY = "country"
@@ -17,6 +19,12 @@ class CaseType(Enum):
     CONFIRMED = "confirmed"
     DEAD = "dead"
     RECOVERED = "recovered"
+
+
+class Aggregations(Enum):
+    DATE = "date"
+    COUNTRY = "country"
+    TYPE = "type"
 
 
 @dataclass
@@ -58,8 +66,9 @@ class CreatedPlace:
 
 class PlaceProperty(Enum):
     ID = "id"
-    ALPHA_2_CODE = "alpha2Code"
-    ALPHA_3_CODE = "alpha3Code"
+    ALPHA_2_CODE = "alpha2"
+    ALPHA_3_CODE = "alpha3"
+    NAME = "name"
 
 
 class OnConflictStrategy(IntEnum):
@@ -71,3 +80,11 @@ class PlaceTable(Enum):
     COUNTRY = "countries"
     PROVINCE = "provinces"
     COUNTY = "counties"
+
+
+class OrderBy(Enum):
+    ASC = "ASC"
+    DESC = "DESC"
+
+
+connection
