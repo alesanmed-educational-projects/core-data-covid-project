@@ -80,6 +80,32 @@ def get_global_cases_normalized(
     return full_url
 
 
+def get_country_cases_normalized(
+    date_gte: datetime, date_lte: datetime, country: str, case_type: str = None
+) -> str:
+    URL = Config.BACK_URL
+
+    country_info = requests.get(f"{URL}/countries?name={country}")
+
+    country_info = country_info.json()[0]
+
+    full_url = (
+        f"{URL}/cases"
+        f"?date[gte]={date_gte}"
+        f"&date[lte]={date_lte}"
+        "&agg=province"
+        "&agg=type"
+        "&normalize=1"
+        f"&country={country_info['alpha2']}"
+    )
+
+    if case_type:
+        full_url = f"{full_url}&type={case_type}"
+
+    return full_url
+
+
+@st.cache
 def _get_max_min_date_data(max: bool) -> datetime:
     if max:
         sort = "-date"
@@ -135,3 +161,16 @@ def get_all_countries() -> list[str]:
     full_url = f"{URL}/countries"
 
     return [c["name"] for c in requests.get(full_url).json()]
+
+
+@st.cache
+def get_countries_with_province() -> list[str]:
+    URL = Config().BACK_URL
+
+    full_url = f"{URL}/provinces"
+
+    response = requests.get(full_url)
+
+    df = pd.DataFrame.from_records(response.json())
+
+    return list(df["country"].unique())

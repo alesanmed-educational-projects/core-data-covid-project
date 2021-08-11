@@ -2,7 +2,7 @@ from src.pages import PAGES
 
 
 def main():
-    Page = PAGES["GeneralData"]
+    Page = PAGES["CountryData"]
 
     Page().write()
 
