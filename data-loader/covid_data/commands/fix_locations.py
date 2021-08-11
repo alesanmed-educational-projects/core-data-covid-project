@@ -1,6 +1,5 @@
-from psycopg2._psycopg import connection, cursor  # pylint: disable=no-name-in-module
-
 from covid_data.db import get_db
+from psycopg2._psycopg import connection, cursor  # pylint: disable=no-name-in-module
 
 
 def fix_wrong_locations(engine: connection):
@@ -13,30 +12,10 @@ def fix_wrong_locations(engine: connection):
 
     provinces_to_fix = [
         {
-            "query": "name='Canarias, Spain'",
-            "update": "name='Canary Islands', code='CN'",
+            "query": "name='Canarias'",
+            "update": "code='CN'",
         },
-        {"query": "name='Navarre'", "update": "code='NC'"},
-        {
-            "query": "code='MC' AND country_id=242",
-            "update": "location=ST_SetSRID(ST_MakePoint(-1.13004, 37.98704), 4326)",
-        },
-        {
-            "query": "code='RI' AND country_id=242",
-            "update": "location=ST_SetSRID(ST_MakePoint(-2.46302, 36.94508), 4326)",
-        },
-        {
-            "query": "code='MD' AND country_id=242",
-            "update": "location=ST_SetSRID(ST_MakePoint(-3.70256, 40.4165), 4326)",
-        },
-        {
-            "query": "code='ML' AND country_id=242",
-            "update": "location=ST_SetSRID(ST_MakePoint(-2.93833, 35.29369), 4326)",
-        },
-        {
-            "query": "code='CE' AND country_id=242",
-            "update": "location=ST_SetSRID(ST_MakePoint(-5.32042, 35.88919), 4326)",
-        },
+        {"query": "name='Comunidad Foral De Navarra'", "update": "code='NC'"},
     ]
 
     with engine.cursor() as cur:

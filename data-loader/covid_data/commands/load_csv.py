@@ -5,7 +5,6 @@ from datetime import datetime
 from logging import getLogger
 
 import pandas as pd
-
 from covid_data.db import close_db, get_db
 from covid_data.db.queries import (
     create_case,
@@ -83,7 +82,6 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
 
             if created_province.province_id and created_country.country_id:
                 saved_cases = get_cases_by_province(
-                    int(created_country.country_id),
                     int(created_province.province_id),
                     engine,
                     case_type,
@@ -118,9 +116,8 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
 
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-
     from covid_data.logger import init_logger
+    from dotenv import load_dotenv
 
     load_dotenv()
 
