@@ -5,6 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python: Flask",
+      "type": "python",
+      "request": "launch",
+      "module": "flask",
+      "env": {
+        "FLASK_APP": "covid-backend",
+        "ENV": "development"
+      },
+      "args": [
+        "run",
+        "--no-debugger"
+      ],
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
       "name": "Python: Archivo actual",
       "type": "python",
       "request": "launch",
@@ -18,7 +33,7 @@
       "module": "streamlit.cli",
       "args": [
         "run",
-        "${workspaceFolder}/app/main.py",
+        "${workspaceFolder}/dashboard/app/main.py",
       ],
     }
   ]
