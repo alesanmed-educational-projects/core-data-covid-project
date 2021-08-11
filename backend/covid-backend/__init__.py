@@ -36,4 +36,8 @@ def create_app(test_config=None):
 
     app.register_blueprint(countries.bp)
 
+    from . import provinces
+
+    app.register_blueprint(provinces.bp)
+
     return app

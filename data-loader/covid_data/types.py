@@ -25,6 +25,7 @@ class Aggregations(Enum):
     DATE = "date"
     COUNTRY = "country"
     TYPE = "type"
+    PROVINCE = "province"
 
 
 @dataclass

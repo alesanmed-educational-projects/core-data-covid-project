@@ -275,7 +275,8 @@ def get_cases_by_filters_query(
         if Aggregations.TYPE in aggregation:
             select += sql.SQL(", c.type")
             columns.append("type")
-
+        if Aggregations.PROVINCE in aggregation:
+            select += sql.SQL(", p.name as province")
     else:
         select += sql.SQL("c.amount, type, c.date, co.name")
         columns.append("type")
@@ -289,7 +290,9 @@ def get_cases_by_filters_query(
     query += sql.SQL("INNER JOIN countries co ON c.country_id = co.id ")
 
     if province_id:
-        select += sql.SQL(", p.name")
+        select += sql.SQL(", p.name as province")
+
+    if province_id or Aggregations.PROVINCE in aggregation:
         query += sql.SQL("INNER JOIN provinces p ON c.province_id = p.id ")
         columns.append("province")
 
@@ -594,13 +597,71 @@ def get_cases_by_date_country(
         )
 
 
-def get_all_countries(engine: connection) -> list[dict]:
+def get_all_countries(engine: connection, name: str = None) -> list[dict]:
     with engine.cursor() as cur:
         cur: cursor
 
-        cur.execute(sql.SQL("SELECT * FROM countries"))
+        params = []
+
+        query = sql.SQL("SELECT * FROM countries")
+
+        if name:
+            query += sql.SQL(" WHERE name=%s")
+            params.append(name)
+
+        cur.execute(query, params)
 
         return row_to_dict(cur.fetchall(), "countries", engine)
+
+
+def get_all_provinces(engine: connection) -> list[dict]:
+    with engine.cursor() as cur:
+        cur: cursor
+
+        cur.execute(
+            sql.SQL(
+                (
+                    "SELECT p.name as province, "
+                    "p.id as province_id, "
+                    "p.code as province_code, "
+                    "c.name as country, "
+                    "c.id as country_id "
+                    "FROM provinces p INNER JOIN countries c ON p.country_id = c.id"
+                )
+            )
+        )
+
+        return row_to_dict(
+            cur.fetchall(),
+            ["province", "province_id", "province_code", "country", "country_id"],
+            engine,
+        )
+
+
+def get_provinces_by_country(engine: connection, country_id: int) -> list[dict]:
+    with engine.cursor() as cur:
+        cur: cursor
+
+        cur.execute(
+            sql.SQL(
+                (
+                    "SELECT p.name as province, "
+                    "p.id as province_id, "
+                    "p.code as province_code, "
+                    "c.name as country, "
+                    "c.id as country_id "
+                    "FROM provinces p INNER JOIN countries c ON p.country_id = c.id"
+                    "WHERE p.country_id=%s"
+                )
+            ),
+            (country_id,),
+        )
+
+        return row_to_dict(
+            cur.fetchall(),
+            ["province", "province_id", "province_code", "country", "country_id"],
+            engine,
+        )
 
 
 if __name__ == "__main__":
