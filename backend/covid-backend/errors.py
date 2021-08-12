@@ -1,0 +1,2 @@
+class FailedDependencyError(Exception):
+    pass
