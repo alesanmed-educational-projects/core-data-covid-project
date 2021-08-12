@@ -1,5 +1,3 @@
-import locale
-
 import streamlit as st
 from src.pages import PAGES
 
