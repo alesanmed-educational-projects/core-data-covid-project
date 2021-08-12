@@ -18,6 +18,9 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
+    app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "../tmp")
+    app.config["ALLOWED_EXTENSIONS"] = {"pdf"}
+
     # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
@@ -39,5 +42,9 @@ def create_app(test_config=None):
     from . import provinces
 
     app.register_blueprint(provinces.bp)
+
+    from . import email
+
+    app.register_blueprint(email.bp)
 
     return app
