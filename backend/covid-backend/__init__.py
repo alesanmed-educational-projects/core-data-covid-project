@@ -61,4 +61,8 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth.bp)
 
+    from . import errors
+
+    app.register_blueprint(errors.bp)
+
     return app
