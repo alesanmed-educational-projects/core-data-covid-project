@@ -10,19 +10,12 @@ from fpdf import FPDF
 from streamlit.delta_generator import DeltaGenerator
 from streamlit_bokeh_events import streamlit_bokeh_events
 
-from ..data import (
-    get_abs_cases_url,
-    get_all_provinces,
-    get_closest_country,
-    get_countries_with_province,
-    get_country,
-    get_country_cases_normalized,
-    get_country_cumm_cases_by_date_url,
-    get_global_cumm_cases_by_province_url,
-    get_max_date_data,
-    get_min_date_data,
-    send_pdf_to_email,
-)
+from ..data import (get_abs_cases_url, get_all_provinces, get_closest_country,
+                    get_countries_with_province, get_country,
+                    get_country_cases_normalized,
+                    get_country_cumm_cases_by_date_url,
+                    get_global_cumm_cases_by_province_url, get_max_date_data,
+                    get_min_date_data, send_pdf_to_email)
 from ..utils import Page
 
 TOPOJSON_MAP = {
@@ -329,13 +322,17 @@ class CountryData(Page):
                 unsafe_allow_html=True,
             )
 
-            email = cols[1].text_input("Email to send the report to")
+            with cols[1]:
+                with st.form("email-form", True):
+                    email = st.text_input("Email to send the report to")
 
-            if cols[1].button("Send PDF to email") and email:
-                success = send_pdf_to_email(pdf_byes, email)
+                    if st.form_submit_button("Send PDF to email") and email:
+                        print(type(pdf_byes))
+                        print(email)
+                        success = send_pdf_to_email(pdf_byes, email)
 
-                if success:
-                    st.success("Email sent")
-                    st.session_state["pdf_export"] = False
-                else:
-                    st.warning("There was an error sending the email.")
+                        if success:
+                            st.success("Email sent")
+                            st.session_state["pdf_export"] = False
+                        else:
+                            st.warning("There was an error sending the email.")

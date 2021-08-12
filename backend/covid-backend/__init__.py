@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -17,7 +18,9 @@ def create_app(test_config=None):
     app.config.from_mapping(SECRET_KEY="dev")
     app.url_map.strict_slashes = False
 
-    init_logger(os.path.join(os.path.dirname(__file__), "../logs/backend.log"))
+    init_logger(
+        os.path.join(os.path.dirname(__file__), "../logs/backend.log"), logging.INFO
+    )
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
