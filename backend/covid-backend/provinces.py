@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from covid_data.db.queries import get_all_provinces
 from flask import Blueprint
@@ -10,7 +11,7 @@ from .utils import serialize_json
 bp = Blueprint("provinces", __name__, url_prefix="/provinces")
 
 
-@bp.route("/", methods=["GET"])
+@bp.route("", methods=["GET"])
 def get_provinces():
     db = get_db()
 
@@ -18,6 +19,6 @@ def get_provinces():
 
     return Response(
         json.dumps(contries, default=serialize_json),
-        200,
+        HTTPStatus.OK,
         {"content-type": "application/json"},
     )
