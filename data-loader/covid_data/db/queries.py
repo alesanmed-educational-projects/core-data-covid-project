@@ -1,16 +1,8 @@
-import json
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from covid_data.types import (
-    Aggregations,
-    CaseType,
-    OnConflictStrategy,
-    OrderBy,
-    PlaceProperty,
-    PlaceTable,
-    PlaceType,
-)
+from covid_data.types import (Aggregations, CaseType, OnConflictStrategy,
+                              OrderBy, PlaceProperty, PlaceTable, PlaceType)
 from psycopg2 import sql
 from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
 from psycopg2._psycopg import cursor  # pylint: disable=no-name-in-module
@@ -793,16 +785,29 @@ def get_provinces_by_country(engine: connection, country_id: int) -> list[dict]:
         )
 
 
-if __name__ == "__main__":
-    from covid_data.db import get_db
-    from dotenv import load_dotenv
+def insert_api_key(engine: connection, hashed_key: str) -> bool:
+    with engine.cursor() as cur:
+        cur: cursor
 
-    load_dotenv()
-
-    print(
-        json.dumps(
-            get_cases_by_date_country(get_db(), None, None, None, ["LIMIT 10000"]),
-            indent=4,
-            default=str,
+        cur.execute(
+            sql.SQL("INSERT INTO api_keys VALUES (DEFAULT, %s)"),
+            (hashed_key,),
         )
-    )
+
+        engine.commit()
+
+        return True
+
+
+def check_api_key(engine: connection, hashed_key: str) -> bool:
+    with engine.cursor() as cur:
+        cur: cursor
+
+        cur.execute(
+            sql.SQL("SELECT COUNT(*) FROM api_keys WHERE api_key=%s"),
+            (hashed_key,),
+        )
+
+        res = int(cur.fetchone()[0])
+
+        return res > 0

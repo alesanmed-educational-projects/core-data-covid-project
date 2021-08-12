@@ -59,3 +59,7 @@ CREATE UNIQUE INDEX cases_unique_case ON cases (
 CREATE INDEX idx_cases_country ON cases (country_id);
 CREATE INDEX idx_cases_province ON cases (province_id);
 CREATE INDEX idx_cases_county ON cases (county_id);
+CREATE TABLE IF NOT EXISTS api_keys (
+  id SERIAL PRIMARY KEY,
+  api_key VARCHAR NOT NULL UNIQUE
+)

@@ -2,16 +2,16 @@ import base64
 import json
 import logging
 import re
+from http import HTTPStatus
 
 import requests
 from flask import Blueprint
 from flask import current_app as app
 from flask import request
 from flask.wrappers import Response
+from werkzeug import exceptions
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-
-from .errors import FailedDependencyError
 
 bp = Blueprint("email", __name__, url_prefix="/email")
 
@@ -30,7 +30,7 @@ def send_email_pdf():
     logger = logging.getLogger("covid-backend")
 
     if "file" not in request.files:
-        raise ValueError("No file sent")
+        raise exceptions.BadRequest("No file sent")
 
     file: FileStorage = request.files["file"]
 
@@ -41,12 +41,12 @@ def send_email_pdf():
     email_regex = r"[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+"
 
     if not email_to or not re.match(email_regex, email_to):
-        raise ValueError("Recipient email is no valid")
+        raise exceptions.BadRequest("Recipient email is no valid")
 
     if file and allowed_file(file.filename or ""):
         filename = secure_filename(file.filename or "")
     else:
-        raise ValueError("The file sent is not valid")
+        raise exceptions.BadRequest("The file sent is not valid")
 
     file_bytes = file.stream.read()
 
@@ -83,6 +83,6 @@ def send_email_pdf():
     if email_response.status_code > 399:
         logger.error(email_response.status_code)
         logger.error(email_response.text)
-        raise FailedDependencyError("Unable to send email")
+        raise exceptions.FailedDependency("Unable to send email")
 
-    return Response(status=201)
+    return Response(status=HTTPStatus.ACCEPTED)

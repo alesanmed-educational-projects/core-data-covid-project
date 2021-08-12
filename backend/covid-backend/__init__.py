@@ -15,6 +15,7 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(SECRET_KEY="dev")
+    app.url_map.strict_slashes = False
 
     init_logger(os.path.join(os.path.dirname(__file__), "../logs/backend.log"))
 
@@ -53,5 +54,11 @@ def create_app(test_config=None):
     from . import email
 
     app.register_blueprint(email.bp)
+
+    from . import auth
+
+    auth.init_app(app)
+
+    app.register_blueprint(auth.bp)
 
     return app
