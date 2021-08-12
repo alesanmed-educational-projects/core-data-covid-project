@@ -1,8 +1,15 @@
+import locale
+
+import streamlit as st
 from src.pages import PAGES
 
 
 def main():
-    Page = PAGES["GeneralData"]
+    st.set_page_config(layout="wide")
+
+    page = st.sidebar.radio("Go to", list(PAGES.keys()))
+
+    Page = PAGES[page]
 
     Page().write()
 

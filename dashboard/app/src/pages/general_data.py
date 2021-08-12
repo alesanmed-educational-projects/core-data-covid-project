@@ -8,6 +8,7 @@ from streamlit.delta_generator import DeltaGenerator
 from ..data import (
     get_abs_cases_url,
     get_all_countries,
+    get_global_cases_by_type,
     get_global_cases_normalized,
     get_global_cumm_cases_by_country_url,
     get_global_cumm_cases_by_date_url,
@@ -27,22 +28,28 @@ class GeneralData(Page):
         return alt.topo_feature(url, "countries")
 
     def write(self):
-        st.set_page_config(layout="wide")
-
         st.title("General Data")
 
         cols: List[DeltaGenerator] = st.beta_columns(3)
 
+        cases_data = get_global_cases_by_type()
+
         cols[0].header("Global confirmed cases")
-        cols[0].subheader(123456)
+        cols[0].subheader(
+            f"{(cases_data[cases_data['type'] == 'confirmed']['amount']).iloc[0]:,}"
+        )
         cols[0].text("")
 
         cols[1].header("Global death cases")
-        cols[1].subheader(123456)
+        cols[1].subheader(
+            f"{(cases_data[cases_data['type'] == 'dead']['amount']).iloc[0]:,}"
+        )
         cols[1].text("")
 
         cols[2].header("Global recovered cases")
-        cols[2].subheader(123456)
+        cols[2].subheader(
+            f"{(cases_data[cases_data['type'] == 'recovered']['amount']).iloc[0]:,}"
+        )
 
         cols: List[DeltaGenerator] = st.beta_columns((1, 1, 3))
 
