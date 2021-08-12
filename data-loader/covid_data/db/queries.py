@@ -1,8 +1,15 @@
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from covid_data.types import (Aggregations, CaseType, OnConflictStrategy,
-                              OrderBy, PlaceProperty, PlaceTable, PlaceType)
+from covid_data.types import (
+    Aggregations,
+    CaseType,
+    OnConflictStrategy,
+    OrderBy,
+    PlaceProperty,
+    PlaceTable,
+    PlaceType,
+)
 from psycopg2 import sql
 from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
 from psycopg2._psycopg import cursor  # pylint: disable=no-name-in-module
@@ -666,47 +673,6 @@ def create_case(
         engine.commit()
 
         return True
-
-
-def get_cases_by_date_country(
-    engine: connection,
-    date_from: datetime = None,
-    date_to: datetime = None,
-    case_type: CaseType = None,
-    params: List[str] = None,
-) -> list:
-    with engine.cursor() as cur:
-        cur: cursor
-
-        query = sql.SQL(
-            "SELECT c.id, c.type, c.amount, c.date, co.name "
-            "FROM cases c INNER JOIN countries co ON c.country_id = co.id"
-        )
-
-        conditions = []
-        query_params = []
-
-        if date_from:
-            conditions.append(sql.SQL("c.date >= %s"))
-            query_params.append(date_from)
-        if date_to:
-            conditions.append(sql.SQL("c.date <= %s"))
-            query_params.append(date_to)
-        if case_type:
-            conditions.append(sql.SQL("c.type = %s"))
-            query_params.append(case_type)
-
-        if len(conditions):
-            query += sql.SQL("WHERE") + sql.SQL(" AND ").join(conditions)
-
-        if params:
-            query += sql.SQL(" ") + sql.SQL(" ").join(sql.SQL(p) for p in params)
-
-        cur.execute(query, tuple(query_params))
-
-        return row_to_dict(
-            cur.fetchall(), ["id", "type", "amount", "date", "country"], engine
-        )
 
 
 def get_all_countries(

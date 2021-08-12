@@ -19,7 +19,7 @@ logger = logging.getLogger("covid-data")
 START_DATE = datetime(2020, 3, 2)
 
 
-def scrap_cases(engine: connection, start_date: datetime = START_DATE) -> None:
+def scrap(engine: connection, start_date: datetime = START_DATE) -> None:
     URL = "https://cnecovid.isciii.es/covid19/#ccaa"
 
     page = requests.get(
@@ -98,10 +98,6 @@ def scrap_cases(engine: connection, start_date: datetime = START_DATE) -> None:
             create_case(case_data, engine, OnConflictStrategy.REPLACE)
 
 
-def scrap():
-    pass
-
-
 if __name__ == "__main__":
     from dotenv import load_dotenv
 
@@ -114,7 +110,7 @@ if __name__ == "__main__":
     engine = get_db()
 
     try:
-        scrap_cases(engine, datetime(2020, 1, 1))
+        scrap(engine, datetime(2020, 1, 1))
     except Exception as e:
         raise e
     finally:

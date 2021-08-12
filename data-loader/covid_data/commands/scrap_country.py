@@ -45,4 +45,4 @@ def main(country: str, check: bool = False, start_date: str = ""):
             if start_date:
                 args.append(datetime.strptime(start_date, "%d/%m/%Y"))
 
-            module.scrap_cases(*args)  # type: ignore
+            module.scrap(*args)  # type: ignore

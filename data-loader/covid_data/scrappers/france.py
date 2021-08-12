@@ -29,7 +29,7 @@ ALT_TYPES = {
 }
 
 
-def scrap_cases(engine: connection, start_date: datetime.datetime = START_DATE) -> None:
+def scrap(engine: connection, start_date: datetime.datetime = START_DATE) -> None:
     URL = "https://dashboard.covid19.data.gouv.fr/data/date-{}.json"
 
     now = datetime.datetime.now()
@@ -118,10 +118,6 @@ def scrap_cases(engine: connection, start_date: datetime.datetime = START_DATE) 
                 create_case(recovered_data, engine, OnConflictStrategy.REPLACE)
 
 
-def scrap():
-    pass
-
-
 if __name__ == "__main__":
     from dotenv import load_dotenv
 
@@ -133,7 +129,7 @@ if __name__ == "__main__":
     engine = get_db()
 
     try:
-        scrap_cases(engine, START_DATE + datetime.timedelta(days=350))
+        scrap(engine, START_DATE + datetime.timedelta(days=350))
     except Exception as e:
         raise e
     finally:
