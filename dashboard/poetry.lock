@@ -287,6 +287,14 @@ pycodestyle = ">=2.7.0,<2.8.0"
 pyflakes = ">=2.3.0,<2.4.0"
 
 [[package]]
+name = "fpdf"
+version = "1.7.2"
+description = "Simple PDF generation for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "gitdb"
 version = "4.0.7"
 description = "Git Object Database"
@@ -1247,7 +1255,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e95a0b77a30bca13b15e1b407edcf7a652cfd0d72595a8e48685bb9cdb1583d5"
+content-hash = "bd61f6a5abeba37118ab9c21f45fdab8fdfa2796e4d19ecbf9484c2071e0b2bf"
 
 [metadata.files]
 altair = [
@@ -1468,6 +1476,11 @@ entrypoints = [
 flake8 = [
     {file = "flake8-3.9.2-py2.py3-none-any.whl", hash = "sha256:bf8fd333346d844f616e8d47905ef3a3384edae6b4e9beb0c5101e25e3110907"},
     {file = "flake8-3.9.2.tar.gz", hash = "sha256:07528381786f2a6237b061f6e96610a4167b226cb926e2aa2b6b1d78057c576b"},
+]
+fpdf = [
+    {file = "fpdf-1.7.2.tar.gz", hash = "sha256:125840783289e7d12552b1e86ab692c37322e7a65b96a99e0ea86cca041b6779"},
+    {file = "fpdf-1.7.2.win-amd64.exe", hash = "sha256:9542f6ad0791d673955da954a0cf3554a0affac79deab87bee06b9b4d4e60990"},
+    {file = "fpdf-1.7.2.win32.exe", hash = "sha256:0a94eb783ee933e32a44ad949a1aa6c3ca6fb35b608db53f8b216aec52fc1fb5"},
 ]
 gitdb = [
     {file = "gitdb-4.0.7-py3-none-any.whl", hash = "sha256:6c4cc71933456991da20917998acbe6cf4fb41eeaab7d6d67fbc05ecd4c865b0"},
