@@ -9,6 +9,7 @@ class Config(object):
     PG_HOST = os.environ.get("PG_HOST", "")
     PG_PORT = os.environ.get("PG_PORT", "")
     PG_DB = os.environ.get("PG_DB", "")
+    SENDGRID_KEY = os.environ.get("SENDGRID_KEY", "")
 
 
 class ProductionConfig(Config):

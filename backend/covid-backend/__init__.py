@@ -1,15 +1,22 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 from flask import Flask
+
+from .logger import init_logger, log_uncaught_exception
 
 load_dotenv()
 
 
 def create_app(test_config=None):
+    sys.excepthook = log_uncaught_exception
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(SECRET_KEY="dev")
+
+    init_logger(os.path.join(os.path.dirname(__file__), "../logs/backend.log"))
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
