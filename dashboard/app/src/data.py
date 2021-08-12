@@ -226,3 +226,16 @@ def get_countries_with_province() -> list[str]:
     df = pd.DataFrame.from_records(response.json())
 
     return list(df["country"].unique())
+
+
+def send_pdf_to_email(file: bytes, email: str) -> bool:
+    URL = Config().BACK_URL
+
+    full_url = f"{URL}/email"
+
+    files = {"file": ("country_data.pdf", file, "application/json")}
+    values = {"recipient": email}
+
+    response = requests.post(full_url, files=files, data=values)
+
+    return response.status_code < 400

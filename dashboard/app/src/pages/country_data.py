@@ -21,6 +21,7 @@ from ..data import (
     get_global_cumm_cases_by_province_url,
     get_max_date_data,
     get_min_date_data,
+    send_pdf_to_email,
 )
 from ..utils import Page
 
@@ -63,7 +64,6 @@ class CountryData(Page):
         return alt.topo_feature(url, property)
 
     def create_pdf(self):
-        alt.renderers.enable("altair_saver", fmts=["png"])
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font(*self.TITLE_FONT)
@@ -77,7 +77,8 @@ class CountryData(Page):
 
         st.title(title)
 
-        if pdf_export:
+        if pdf_export or st.session_state.get("pdf_export", False):
+            st.session_state["pdf_export"] = True
             self.create_pdf()
             self.pdf.cell(0, 10, title, 0, 1, "C")
 
@@ -95,7 +96,7 @@ class CountryData(Page):
             value=[min_date, max_date],
         )
 
-        if pdf_export:
+        if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 10, date_title, 0, 1)
             self.pdf.set_font(*self.BODY_FONT)
@@ -144,7 +145,7 @@ class CountryData(Page):
                 country_info = country
 
         if selected_country == "-":
-            if pdf_export:
+            if st.session_state.get("pdf_export", False):
                 st.warning("You have to select a country in order to export a PDF")
 
             st.stop()
@@ -152,7 +153,7 @@ class CountryData(Page):
         if not country_info:
             country_info = get_country(selected_country)[0]
 
-        if pdf_export:
+        if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 10, "Selected country", 0, 1)
             self.pdf.set_font(*self.BODY_FONT)
@@ -198,7 +199,7 @@ class CountryData(Page):
 
             st.altair_chart(chart, True)
 
-            if pdf_export:
+            if st.session_state.get("pdf_export", False):
                 img_name = "./assets/provinces_contributions.png"
                 # save(chart, img_name, method="selenium") Deactivated
 
@@ -228,7 +229,7 @@ class CountryData(Page):
                 dates[0], dates[1], "province", country_info["alpha2"]
             )
 
-        if pdf_export:
+        if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 10, chart_type_title, 0, 1)
             self.pdf.set_font(*self.BODY_FONT)
@@ -279,7 +280,7 @@ class CountryData(Page):
 
         cols[0].altair_chart(chart, True)
 
-        if pdf_export:
+        if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 20, country_header_title, 0, 1)
             self.pdf.image("./assets/country_evolution.png", w=180)
@@ -313,17 +314,28 @@ class CountryData(Page):
 
         cols[1].altair_chart(chart, True)
 
-        if pdf_export:
+        if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 20, province_header_title, 0, 1)
             self.pdf.image("./assets/cases_by_province.png", w=180)
-            pdf_str = base64.b64encode(
-                self.pdf.output(dest="S").encode("latin-1")
-            ).decode()
-            st.markdown(
+            pdf_byes = self.pdf.output(dest="S").encode("latin-1")
+            pdf_str = base64.b64encode(pdf_byes).decode()
+            cols: list[DeltaGenerator] = st.beta_columns((1, 3))
+            cols[0].markdown(
                 (
                     '<a download="country_data.pdf" '
                     f'href="data:application/pdf;base64,{pdf_str}">Download PDF</a>'
                 ),
                 unsafe_allow_html=True,
             )
+
+            email = cols[1].text_input("Email to send the report to")
+
+            if cols[1].button("Send PDF to email") and email:
+                success = send_pdf_to_email(pdf_byes, email)
+
+                if success:
+                    st.success("Email sent")
+                    st.session_state["pdf_export"] = False
+                else:
+                    st.warning("There was an error sending the email.")
