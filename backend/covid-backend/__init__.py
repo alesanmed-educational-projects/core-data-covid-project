@@ -54,4 +54,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(email.bp)
 
+    from . import auth
+
+    auth.init_app(app)
+
+    app.register_blueprint(auth.bp)
+
     return app
