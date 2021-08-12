@@ -16,7 +16,20 @@ def get_countries():
 
     name = request.args.get("name", None)
 
-    contries = get_all_countries(db, name)
+    near = request.args.get("near", None)
+    near_fixed = []
+
+    if near:
+        try:
+            near_fixed = [float(p) for p in near.split(",")]
+
+            if len(near_fixed) != 2:
+                raise ValueError()
+
+        except ValueError:
+            raise ValueError(f"Lat long field {near} not valid")
+
+    contries = get_all_countries(db, name, near_fixed)
 
     return Response(
         json.dumps(contries, default=serialize_json),

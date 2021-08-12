@@ -8,6 +8,8 @@ from covid_data.db.queries import (
     get_country_by_alpha3,
     get_cum_cases_by_country,
     get_cum_cases_by_date,
+    get_cum_cases_by_date_country,
+    get_cum_cases_by_province,
     get_province_by_name,
 )
 from covid_data.types import Aggregations, CaseType
@@ -126,6 +128,22 @@ def get_cases():
 
     if result_type_fix and result_type_fix is ResultType.CUMMULATIVE_DATE:
         cases = get_cum_cases_by_date(db, date, date_lte, date_gte, case_type_fix)
+    elif result_type_fix is ResultType.CUMMULATIVE_DATE_COUNTRY:
+        if not country_id:
+            raise ValueError(
+                "A country is required when requesting this type of result"
+            )
+        cases = get_cum_cases_by_date_country(
+            db, country_id, date, date_lte, date_gte, case_type_fix
+        )
+    elif result_type_fix is ResultType.CUMMULATIVE_PROVINCE:
+        if not country_id:
+            raise ValueError(
+                "A country is required when requesting this type of result"
+            )
+        cases = get_cum_cases_by_province(
+            db, date, date_lte, date_gte, case_type_fix, country_id
+        )
     elif result_type_fix:
         cases = get_cum_cases_by_country(db, date, date_lte, date_gte, case_type_fix)
     else:

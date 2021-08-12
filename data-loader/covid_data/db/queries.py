@@ -276,7 +276,7 @@ def get_cases_by_filters_query(
             select += sql.SQL(", c.type")
             columns.append("type")
         if Aggregations.PROVINCE in aggregation:
-            select += sql.SQL(", p.name as province")
+            select += sql.SQL(", p.name as province, p.code as province_code")
     else:
         select += sql.SQL("c.amount, type, c.date, co.name")
         columns.append("type")
@@ -290,11 +290,12 @@ def get_cases_by_filters_query(
     query += sql.SQL("INNER JOIN countries co ON c.country_id = co.id ")
 
     if province_id:
-        select += sql.SQL(", p.name as province")
+        select += sql.SQL(",p.name as province, p.code as province_code")
 
     if province_id or Aggregations.PROVINCE in aggregation:
         query += sql.SQL("INNER JOIN provinces p ON c.province_id = p.id ")
         columns.append("province")
+        columns.append("province_code")
 
     if country_id:
         constraints.append(sql.SQL("c.country_id=%s"))
@@ -458,6 +459,66 @@ def get_cum_cases_by_date(
         return row_to_dict(cur.fetchall(), columns, engine)
 
 
+def get_cum_cases_by_date_country(
+    engine: connection,
+    country_id: int,
+    date: datetime = None,
+    date_lte: datetime = None,
+    date_gte: datetime = None,
+    case_type: CaseType = None,
+) -> List[Dict]:
+    columns = ["type", "amount", "date", "province"]
+
+    params: list[Any] = [country_id]
+
+    inner_query = sql.SQL(
+        (
+            "SELECT c.type as type, sum(c.amount) as amount, "
+            "c.date as date, p.name as province "
+            "FROM cases c INNER JOIN provinces p ON c.province_id = p.id "
+            "WHERE c.country_id=%s "
+        )
+    )
+
+    if date:
+        inner_query += sql.SQL("AND date=%s")
+        params.append(date)
+    elif date_gte or date_lte:
+        if date_gte:
+            inner_query += sql.SQL("AND date>=%d")
+            params.append(date_gte)
+
+        if date_lte:
+            inner_query += sql.SQL("AND date<=%s")
+            params.append(date_lte)
+
+    if case_type:
+        inner_query += sql.SQL("AND type=%s")
+        params.append(case_type.value)
+
+    inner_query += sql.SQL(("GROUP BY c.date, c.type, p.name"))
+
+    outter_query = (
+        sql.SQL(
+            (
+                "SELECT "
+                "type, "
+                "sum(amount) OVER (PARTITION BY type, province ORDER BY date ASC), "
+                "date, province FROM ( "
+            )
+        )
+        + inner_query
+        + sql.SQL((") as _ ORDER BY date ASC"))
+    )
+
+    with engine.cursor() as cur:
+        cur: cursor
+
+        cur.execute(outter_query, tuple(params))
+
+        return row_to_dict(cur.fetchall(), columns, engine)
+
+
 def get_cum_cases_by_country(
     engine: connection,
     date: datetime = None,
@@ -510,6 +571,65 @@ def get_cum_cases_by_country(
                 "SELECT "
                 "country, "
                 "sum(amount) OVER (PARTITION BY country ORDER BY date ASC), "
+                "date FROM ( "
+            )
+        )
+        + inner_query
+        + sql.SQL((") as _ ORDER BY date ASC"))
+    )
+
+    with engine.cursor() as cur:
+        cur: cursor
+
+        cur.execute(outter_query, tuple(params))
+
+        return row_to_dict(cur.fetchall(), columns, engine)
+
+
+def get_cum_cases_by_province(
+    engine: connection,
+    date: datetime = None,
+    date_lte: datetime = None,
+    date_gte: datetime = None,
+    case_type: CaseType = None,
+    country_id: int = None,
+) -> List[Dict]:
+    columns = ["province", "amount", "date"]
+
+    params: list[Any] = [country_id]
+
+    inner_query = sql.SQL(
+        (
+            "SELECT p.name as province, sum(c.amount) as amount, c.date as date "
+            "FROM cases c INNER JOIN provinces p ON c.province_id = p.id "
+            "WHERE c.country_id=%s"
+        )
+    )
+
+    if date:
+        inner_query += sql.SQL("AND date=%s")
+        params.append(date)
+    elif date_gte or date_lte:
+        if date_gte:
+            inner_query += sql.SQL("AND date>=%d")
+            params.append(date_gte)
+
+        if date_lte:
+            inner_query += sql.SQL("AND date<=%s")
+            params.append(date_lte)
+
+    if case_type:
+        inner_query += sql.SQL("AND type=%s")
+        params.append(case_type.value)
+
+    inner_query += sql.SQL(("GROUP BY c.date, p.name"))
+
+    outter_query = (
+        sql.SQL(
+            (
+                "SELECT "
+                "province, "
+                "sum(amount) OVER (PARTITION BY province ORDER BY date ASC), "
                 "date FROM ( "
             )
         )
@@ -597,7 +717,9 @@ def get_cases_by_date_country(
         )
 
 
-def get_all_countries(engine: connection, name: str = None) -> list[dict]:
+def get_all_countries(
+    engine: connection, name: str = None, near: list[float] = []
+) -> list[dict]:
     with engine.cursor() as cur:
         cur: cursor
 
@@ -608,6 +730,13 @@ def get_all_countries(engine: connection, name: str = None) -> list[dict]:
         if name:
             query += sql.SQL(" WHERE name=%s")
             params.append(name)
+
+        if len(near):
+            query += sql.SQL(
+                " ORDER BY location <-> ST_SetSRID(ST_MakePoint(%s,%s), 4326)"
+            )
+            params.append(near[1])
+            params.append(near[0])
 
         cur.execute(query, params)
 
@@ -650,7 +779,7 @@ def get_provinces_by_country(engine: connection, country_id: int) -> list[dict]:
                     "p.code as province_code, "
                     "c.name as country, "
                     "c.id as country_id "
-                    "FROM provinces p INNER JOIN countries c ON p.country_id = c.id"
+                    "FROM provinces p INNER JOIN countries c ON p.country_id = c.id "
                     "WHERE p.country_id=%s"
                 )
             ),
