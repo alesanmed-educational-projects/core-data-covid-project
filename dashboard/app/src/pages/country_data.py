@@ -39,8 +39,8 @@ TOPOJSON_MAP = {
         "url": (
             "https://raw.githubusercontent.com/"
             "alesanmed-educational-projects/"
-            "core-data-covid-project/feature/"
-            "%232-geoqueries/assets/topojson/canadaprovtopo.json"
+            "core-data-covid-project/main/assets/"
+            "topojson/canadaprovtopo.json"
         ),
         "property": "canadaprov",
         "key": "id",
