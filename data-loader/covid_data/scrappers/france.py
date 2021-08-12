@@ -3,15 +3,15 @@ import json
 import logging
 import os
 
+import click
 import requests
-from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
-
+from click.exceptions import ClickException
 from covid_data.db import close_db, get_db
 from covid_data.db.queries import OnConflictStrategy, create_case
-from covid_data.errors import DateFetchException
 from covid_data.logger import init_logger
 from covid_data.types import CaseType, PlaceType
 from covid_data.utils.places import create_country, create_province
+from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
 
 logger = logging.getLogger("covid-data")
 
@@ -37,16 +37,21 @@ def scrap_cases(engine: connection, start_date: datetime.datetime = START_DATE) 
     days_from_start_to_now = (now - start_date).days + 1
 
     for i in range(days_from_start_to_now):
-        logger.info(f"Processing day {i+1}/{days_from_start_to_now}")
+        message = f"Processing day {i+1}/{days_from_start_to_now}"
+        logger.info(message)
+        click.echo(message)
         curr_date = start_date + datetime.timedelta(days=i)
 
         response = requests.get(URL.format(curr_date.strftime("%Y-%m-%d")))
 
         if response.status_code > 399:
-            logger.error(f"Error fetching data for date {curr_date}")
+            message = f"Error fetching data for date {curr_date}"
+            logger.error(message)
+            click.echo(message)
             logger.error(response)
+            click.echo(response)
 
-            raise DateFetchException()
+            raise ClickException(message)
 
         data = json.loads(response.text)
 

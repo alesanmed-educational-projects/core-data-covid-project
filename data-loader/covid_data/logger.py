@@ -15,10 +15,6 @@ def init_logger(logfile: str, level: int = logging.DEBUG):
     file_handler.setFormatter(log_formatter)
     root_logger.addHandler(file_handler)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(log_formatter)
-    root_logger.addHandler(console_handler)
-
     sys.excepthook = log_uncaught_exception
 
 
