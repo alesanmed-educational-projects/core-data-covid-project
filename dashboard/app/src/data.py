@@ -239,3 +239,40 @@ def send_pdf_to_email(file: bytes, email: str) -> bool:
     response = requests.post(full_url, files=files, data=values)
 
     return response.status_code < 400
+
+
+def check_auth(key: str) -> bool:
+    URL = Config().BACK_URL
+
+    full_url = f"{URL}/auth"
+
+    response = requests.post(full_url, headers={"Authorization": f"Bearer {key}"})
+
+    return response.status_code < 400
+
+
+def create_country(
+    name: str, alpha2: str, alpha3: str, lat: float, lng: float, api_key
+) -> bool:
+    URL = Config().BACK_URL
+
+    full_url = f"{URL}/countries"
+
+    country_data = {
+        "name": name,
+        "alpha2": alpha2,
+        "alpha3": alpha3,
+        "lat": lat,
+        "lng": lng,
+    }
+
+    response = requests.post(
+        full_url,
+        json=country_data,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "content-type": "application/json",
+        },
+    )
+
+    return response.status_code < 400

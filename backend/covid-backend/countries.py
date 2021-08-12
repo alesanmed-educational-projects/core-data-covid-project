@@ -58,6 +58,7 @@ def add_country():
     try:
         inserted_id = create_country(country_data, db)
     except Exception as e:
+        logger.error("Error creating country")
         logger.error(e)
         raise exceptions.BadRequest("Invalid country")
 
