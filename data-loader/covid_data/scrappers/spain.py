@@ -3,22 +3,23 @@ import logging
 import os
 from datetime import datetime
 
+import click
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
-
 from covid_data.db import close_db, get_db
 from covid_data.db.queries import create_case
-from covid_data.errors import EmptyCCAACasesException
 from covid_data.logger import init_logger
 from covid_data.types import CaseType, OnConflictStrategy
 from covid_data.utils.places import create_country, create_province
+from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
 
 logger = logging.getLogger("covid-data")
 
+START_DATE = datetime(2020, 3, 2)
 
-def scrap_cases(engine: connection) -> None:
+
+def scrap_cases(engine: connection, start_date: datetime = START_DATE) -> None:
     URL = "https://cnecovid.isciii.es/covid19/#ccaa"
 
     page = requests.get(
@@ -33,8 +34,9 @@ def scrap_cases(engine: connection) -> None:
     )
 
     if page.status_code > 399:
-        logger.error(f"Error fetching cases in {__file__} scrapper")
-        raise EmptyCCAACasesException()
+        message = f"Error fetching cases in {__file__} scrapper"
+        logger.error(message)
+        raise click.ClickException("Empty CCAA info")
 
     raw_response = page.content.decode("utf-8")
     html = BeautifulSoup(raw_response, features="html.parser")
@@ -42,13 +44,17 @@ def scrap_cases(engine: connection) -> None:
     div_curve = html.find("div", id="curva-epidémica")
 
     if div_curve is None:
-        logger.error("No data found in page")
+        message = "No data found in page"
+        logger.error(message)
+        click.echo(message)
         return None
 
     script_data = div_curve.find("script")
 
     if type(script_data) is not Tag:
-        logger.error("No data found in page")
+        message = "No data found in page"
+        logger.error(message)
+        click.echo(message)
         return None
 
     json_data = json.loads(script_data.string or "{}")
@@ -59,7 +65,9 @@ def scrap_cases(engine: connection) -> None:
     ]
 
     for i, ca in enumerate(ccaa):
-        logger.info(f"Fetching cases for province {i + 1}/{len(ccaa)}")
+        message = f"Fetching cases for province {i + 1}/{len(ccaa)}"
+        logger.info(message)
+        click.echo(message)
         data_element = json_data["x"]["data"][i]
 
         cases = zip(data_element["x"], data_element["y"])
@@ -74,6 +82,9 @@ def scrap_cases(engine: connection) -> None:
             date_str = case[0]
 
             date = datetime.strptime(date_str, "%Y-%m-%d")
+
+            if date <= start_date:
+                continue
 
             case_data = {
                 "type": CaseType.CONFIRMED.value,
@@ -103,7 +114,7 @@ if __name__ == "__main__":
     engine = get_db()
 
     try:
-        scrap_cases(engine)
+        scrap_cases(engine, datetime(2020, 1, 1))
     except Exception as e:
         raise e
     finally:

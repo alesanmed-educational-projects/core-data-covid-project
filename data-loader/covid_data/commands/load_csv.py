@@ -1,10 +1,11 @@
-import logging
 import os
 from contextlib import ExitStack
 from datetime import datetime
 from logging import getLogger
 
+import click
 import pandas as pd
+from click.exceptions import ClickException
 from covid_data.db import close_db, get_db
 from covid_data.db.queries import (
     create_case,
@@ -32,7 +33,9 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
         num_rows = df.shape[0]
 
         for index, row in enumerate(df.itertuples(index=False)):
-            logger.info(f"Processing row {index + 1}/{num_rows}")
+            message = f"Processing row {index + 1}/{num_rows}"
+            logger.info(message)
+            click.echo(message)
             state: str = row[df.columns.get_loc("Province/State")]
             country: str = row[df.columns.get_loc("Country/Region")]
             lat: float = row.Lat
@@ -41,7 +44,9 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
             created_province = CreatedPlace()
 
             if (pd.isna(lat) or pd.isna(lng)) or (lat == 0 or lng == 0):
-                logger.warning(f"Skipping line {index + 2} due to missing location")
+                message = f"Skipping line {index + 2} due to missing location"
+                logger.warning(message)
+                click.echo(message)
                 continue
 
             err = False
@@ -53,23 +58,28 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
                     created_country = create_country(country.replace("*", ""), engine)
             except PlaceInfoFetchException:
                 err = True
-                logger.error(f"Skipping line {index + 2}")
+                message = f"Skipping line {index + 2}"
+                logger.error(message)
+                click.echo(message)
             except (PlaceInfoNotCompleteException, PlaceNotMatchedException):
                 err = True
-                logger.error(
-                    f"Skipping line {index + 2} due to incomplete information in fetching"
-                )
+                message = f"Skipping line {index + 2} due to incomplete information in fetching"
+                logger.error(message)
+                click.echo(message)
             except PlaceNameNotProvidedException:
                 err = True
-                logger.error(
-                    f"Skipping line {index + 2} because no place name could be extracted"
-                )
+                message = f"Skipping line {index + 2} because no place name could be extracted"
+                logger.error(message)
+                click.echo(message)
             except (TypeError, KeyError) as e:
                 err = True
-                logger.error(e)
-                logger.error(
+                message = (
                     f"Skipping line {index + 2} due to missing information in fetching"
                 )
+                logger.error(e)
+                click.echo(e)
+                logger.error(message)
+                click.echo(message)
 
             if err:
                 continue
@@ -91,12 +101,16 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
                     int(created_country.country_id), engine, case_type
                 )
 
-            if len(saved_cases) >= num_columns:
-                logger.debug(f"Skipping line {index + 2} for optimizations")
+            if optimize and len(saved_cases) >= num_columns:
+                message = f"Skipping line {index + 2} for optimizations"
+                logger.debug(message)
+                click.echo(message)
                 continue
 
             for i, date_str in enumerate(cols):
-                logger.debug(f"Processing case {i+1}/{num_columns}")
+                message = f"Processing case {i+1}/{num_columns}"
+                logger.debug(message)
+                click.echo(message)
                 date_padded: str
 
                 date_padded = "/".join([part.zfill(2) for part in date_str.split("/")])
@@ -115,35 +129,58 @@ def insert_data(df: pd.DataFrame, case_type: CaseType, optimize: bool = True) ->
                 create_case(case, engine, OnConflictStrategy.REPLACE)
 
 
-if __name__ == "__main__":
-    from covid_data.logger import init_logger
-    from dotenv import load_dotenv
+@click.command("loadcsv")
+@click.argument("files")
+@click.option(
+    "-t",
+    "--type",
+    default="",
+    help="Type of cases contained in each file, separated by comma. Leave blank if using --type-in-file",
+)
+@click.option(
+    "-tf",
+    "--type-in-file",
+    default=True,
+    help="Set this to true if the file names are <case_type>.csv Being <case_type> one of confirmed, recovered or dead",
+    is_flag=True,
+)
+@click.option(
+    "-o",
+    "--optimize",
+    default=True,
+    help="Set to true to skip lines for places that has more cases than columns on the CSV",
+    is_flag=True,
+)
+def main(files: str, type: str = "", type_in_file: bool = True, optimize: bool = True):
+    """Loads FILES as CSV data. If you want to load several files, each file should be separated by comma"""
+    file_paths = files.split(",")
 
-    load_dotenv()
+    types_fix = []
+    types = []
 
-    init_logger(
-        os.path.join(os.path.dirname(__file__), "../../logs/covid_data.log"),
-        logging.INFO,
-    )
+    if not type_in_file:
+        types = type.split(",")
+    else:
+        for file_path in file_paths:
+            file_type = os.path.basename(file_path).replace(".csv", "")
+            types.append(file_type)
 
-    for info in [
-        (
-            os.path.join(os.path.dirname(__file__), "../../data/confirmed_global.csv"),
-            CaseType.CONFIRMED,
-        ),
-        (
-            os.path.join(os.path.dirname(__file__), "../../data/deaths_global.csv"),
-            CaseType.DEAD,
-        ),
-        (
-            os.path.join(os.path.dirname(__file__), "../../data/recovered_global.csv"),
-            CaseType.RECOVERED,
-        ),
-    ]:
-        logger.info(f"Inserting {info[1]} cases")
+    for type in types:
+        if type not in {t.value for t in CaseType.__members__.values()}:
+            raise ClickException("Type {type} not valid")
+        types_fix.append(CaseType(type))
+
+    for info in zip(file_paths, types_fix):
+        message = f"Inserting {info[1]} cases"
+        logger.info(message)
+        click.echo(message)
 
         path: str = info[0]
 
         df = pd.read_csv(path)
 
-        insert_data(df, info[1])
+        insert_data(df, info[1], optimize)
+
+
+if __name__ == "__main__":
+    main()  # pylint: disable=no-value-for-parameter
