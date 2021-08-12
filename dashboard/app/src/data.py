@@ -1,38 +1,20 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
 
 from .config import Config
-from .types import CaseType, DataReturnType
 
 
-def get_global_confirmed_by_date(
-    date_from: datetime,
-    date_to: datetime,
-    return_type: DataReturnType = DataReturnType.DATAFRAME,
-):
-    days_difference = (date_to - date_from).days
+def get_global_cases_by_type() -> pd.DataFrame:
+    URL = Config().BACK_URL
 
-    random_samples = np.random.randint(0, 10000, (days_difference, len(CaseType)))
+    full_url = f"{URL}/cases?agg=type"
 
-    data = []
+    response = requests.get(full_url)
 
-    for i in range(days_difference):
-        date = date_from + timedelta(days=i)
-        for idx, case_type in enumerate(CaseType):
-            case = {
-                "date": date,
-                "cases": random_samples[i, idx],
-                "type": case_type.value,
-            }
-
-            data.append(case)
-
-    if return_type is DataReturnType.DATAFRAME:
-        data = pd.DataFrame.from_records(data)
+    data = pd.DataFrame.from_records(response.json())
 
     return data
 
@@ -45,17 +27,28 @@ def get_cases_url(date_gte: datetime, date_lte: datetime) -> str:
     return full_url
 
 
-def get_abs_cases_url(date_gte: datetime, date_lte: datetime) -> str:
+def get_abs_cases_url(
+    date_gte: datetime,
+    date_lte: datetime,
+    agg_place: str = "country",
+    country_code: str = None,
+) -> str:
     URL = Config().BACK_URL
 
     full_url = (
         f"{URL}/cases"
         f"?date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
-        "&agg=country"
+        f"&agg={agg_place}"
         "&agg=date"
         "&agg=type"
     )
+
+    if agg_place == "province":
+        full_url = f"{full_url}&agg=province_code"
+
+    if country_code:
+        full_url = f"{full_url}&country={country_code}"
 
     return full_url
 
@@ -63,7 +56,7 @@ def get_abs_cases_url(date_gte: datetime, date_lte: datetime) -> str:
 def get_global_cases_normalized(
     date_gte: datetime, date_lte: datetime, case_type: str = None
 ) -> str:
-    URL = Config.BACK_URL
+    URL = Config().BACK_URL
 
     full_url = (
         f"{URL}/cases"
@@ -80,14 +73,21 @@ def get_global_cases_normalized(
     return full_url
 
 
+def get_country(country_name: str) -> dict:
+    URL = Config().BACK_URL
+    country_info = requests.get(f"{URL}/countries?name={country_name}")
+
+    country_info = country_info.json()
+
+    return country_info
+
+
 def get_country_cases_normalized(
     date_gte: datetime, date_lte: datetime, country: str, case_type: str = None
 ) -> str:
-    URL = Config.BACK_URL
+    URL = Config().BACK_URL
 
-    country_info = requests.get(f"{URL}/countries?name={country}")
-
-    country_info = country_info.json()[0]
+    country_info = get_country(country)[0]
 
     full_url = (
         f"{URL}/cases"
@@ -95,6 +95,7 @@ def get_country_cases_normalized(
         f"&date[lte]={date_lte}"
         "&agg=province"
         "&agg=type"
+        "&agg=province_code"
         "&normalize=1"
         f"&country={country_info['alpha2']}"
     )
@@ -142,6 +143,31 @@ def get_global_cumm_cases_by_date_url(date_gte: datetime, date_lte: datetime) ->
     return full_url
 
 
+def get_closest_country(lat, long) -> dict:
+    URL = Config().BACK_URL
+
+    full_url = f"{URL}/countries?near={lat},{long}"
+
+    country_res = requests.get(full_url)
+
+    return country_res.json()[0]
+
+
+def get_country_cumm_cases_by_date_url(
+    date_gte: datetime, date_lte: datetime, country_code: str
+) -> str:
+    URL = Config().BACK_URL
+
+    full_url = (
+        f"{URL}/cases?resultType=cummulativeDateCountry"
+        f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
+        f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
+        f"&country={country_code}"
+    )
+
+    return full_url
+
+
 def get_global_cumm_cases_by_country_url(date_gte: datetime, date_lte: datetime) -> str:
     URL = Config().BACK_URL
 
@@ -154,6 +180,21 @@ def get_global_cumm_cases_by_country_url(date_gte: datetime, date_lte: datetime)
     return full_url
 
 
+def get_global_cumm_cases_by_province_url(
+    date_gte: datetime, date_lte: datetime, country: str
+) -> str:
+    URL = Config().BACK_URL
+
+    full_url = (
+        f"{URL}/cases?resultType=cummulativeProvince"
+        f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
+        f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
+        f"&country={country}"
+    )
+
+    return full_url
+
+
 @st.cache
 def get_all_countries() -> list[str]:
     URL = Config().BACK_URL
@@ -161,6 +202,17 @@ def get_all_countries() -> list[str]:
     full_url = f"{URL}/countries"
 
     return [c["name"] for c in requests.get(full_url).json()]
+
+
+@st.cache
+def get_all_provinces(country: str) -> list[str]:
+    URL = Config().BACK_URL
+
+    country_info = get_country(country)[0]
+
+    full_url = f"{URL}/countries/{country_info['id']}/provinces"
+
+    return [p["province"] for p in requests.get(full_url).json()]
 
 
 @st.cache

@@ -2,24 +2,46 @@ from typing import List
 
 import altair as alt
 import streamlit as st
-from altair import datum
+from bokeh.models import CustomJS
+from bokeh.models.widgets import Button
 from streamlit.delta_generator import DeltaGenerator
+from streamlit_bokeh_events import streamlit_bokeh_events
 
 from ..data import (
     get_abs_cases_url,
-    get_all_countries,
+    get_all_provinces,
+    get_closest_country,
     get_countries_with_province,
+    get_country,
     get_country_cases_normalized,
-    get_global_cases_normalized,
-    get_global_cumm_cases_by_country_url,
-    get_global_cumm_cases_by_date_url,
+    get_country_cumm_cases_by_date_url,
+    get_global_cumm_cases_by_province_url,
     get_max_date_data,
     get_min_date_data,
 )
 from ..utils import Page
 
 TOPOJSON_MAP = {
-    "Spain": "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/spain/spain-comunidad-with-canary-islands.json"
+    "Spain": {
+        "url": (
+            "https://raw.githubusercontent.com/"
+            "alesanmed-educational-projects/"
+            "core-data-covid-project/main/assets/"
+            "topojson/spain-comunidad-with-canary-islands.json"
+        ),
+        "property": "ESP_adm1",
+        "key": "properties.HASC_1",
+    },
+    "Canada": {
+        "url": (
+            "https://raw.githubusercontent.com/"
+            "alesanmed-educational-projects/"
+            "core-data-covid-project/feature/"
+            "%232-geoqueries/assets/topojson/canadaprovtopo.json"
+        ),
+        "property": "canadaprov",
+        "key": "id",
+    },
 }
 
 
@@ -29,15 +51,13 @@ class CountryData(Page):
         return alt.Chart(url)
 
     @st.cache
-    def get_topo(self, url: str) -> alt.UrlData:
-        return alt.topo_feature(url, "ESP_adm1")
+    def get_topo(self, url: str, property) -> alt.UrlData:
+        return alt.topo_feature(url, property)
 
     def write(self):
-        # st.set_page_config(layout="wide")
-
         st.title("Country Data")
 
-        cols: List[DeltaGenerator] = st.beta_columns((1, 1))
+        cols: List[DeltaGenerator] = st.beta_columns((1, 3))
 
         min_date = get_min_date_data()
         max_date = get_max_date_data()
@@ -54,12 +74,53 @@ class CountryData(Page):
         selected_country = st.selectbox(
             "Country to view data for", ["-"] + available_countries
         )
+        country_info = None
+
+        st.write("Or...")
+
+        loc_button = Button(label="Get Location")
+        loc_button.js_on_event(  # type: ignore
+            "button_click",
+            CustomJS(
+                code=(
+                    "navigator.geolocation.getCurrentPosition("
+                    "(loc) => {"
+                    "document.dispatchEvent(new CustomEvent('GET_LOCATION', "
+                    "{detail: {lat: loc.coords.latitude, lon: loc.coords.longitude}}))"
+                    "}"
+                    ")"
+                )
+            ),
+        )
+        result = streamlit_bokeh_events(
+            loc_button,
+            events="GET_LOCATION",
+            key="get_location",
+            refresh_on_update=False,
+            override_height=75,
+            debounce_time=0,
+        )
+
+        if result:
+            if "GET_LOCATION" in result:
+                latlong = result.get("GET_LOCATION")
+
+                country = get_closest_country(latlong["lat"], latlong["lon"])
+
+                selected_country = country["name"]
+                country_info = country
 
         if selected_country == "-":
             st.stop()
 
+        if not country_info:
+            country_info = get_country(selected_country)[0]
+
         if selected_country in TOPOJSON_MAP:
-            source = self.get_topo(TOPOJSON_MAP[selected_country])
+            source = self.get_topo(
+                TOPOJSON_MAP[selected_country]["url"],
+                TOPOJSON_MAP[selected_country]["property"],
+            )
 
             case_type = st.selectbox("Case type", ["confirmed", "recovered", "dead"], 0)
 
@@ -71,124 +132,107 @@ class CountryData(Page):
 
             # Layering and configuring the components
             chart = (
-                alt.Chart(source).mark_geoshape(fill="#00ff00")
-                # .transform_calculate(province_id="slice(datum.properties.HASC_1, 0, 3)")
-                # .encode(
-                #     color="amount:Q",
-                #     tooltip=[
-                #         alt.Tooltip("properties.NAME_1:N", title="State"),
-                #         alt.Tooltip("amount:Q", title="Amount rate", format=".3%"),
-                #     ],
-                # )
-                # .transform_lookup(
-                #     lookup="properties.HASC_1",
-                #     from_=alt.LookupData(
-                #         alt.UrlData(country_cases_url, alt.JsonDataFormat()),
-                #         "province",
-                #         ["amount"],
-                #     ),
-                # )
+                alt.Chart(source)
+                .mark_geoshape()
+                .encode(
+                    color="amount:Q",
+                    tooltip=[
+                        alt.Tooltip("properties.NAME_1:N", title="State"),
+                        alt.Tooltip("amount:Q", title="Amount rate", format=".2%"),
+                    ],
+                )
+                .transform_lookup(
+                    lookup=TOPOJSON_MAP[selected_country]["key"],
+                    from_=alt.LookupData(
+                        alt.UrlData(country_cases_url, alt.JsonDataFormat()),
+                        "province_code",
+                        ["amount"],
+                    ),
+                )
                 .properties(height=600)
             )
 
             st.altair_chart(chart, True)
 
-        # dates = cols[0].date_input(
-        #     "Date range",
-        #     min_value=min_date,
-        #     max_value=max_date,
-        #     value=[min_date, max_date],
-        # )
+        cols: List[DeltaGenerator] = st.beta_columns((1, 3))
 
-        # chart_type = cols[1].selectbox("Chart type", ["Cummulative", "Absolute"], 0)
+        chart_type = cols[0].selectbox("Chart type", ["Cummulative", "Absolute"], 0)
 
-        # all_countries = get_all_countries()
-        # countries = cols[2].multiselect("Countries", all_countries)
+        all_provinces = get_all_provinces(selected_country)
+        provinces = cols[1].multiselect("Provinces", all_provinces)
 
-        # if chart_type == "Cummulative":
-        #     global_cases_url = get_global_cumm_cases_by_date_url(
-        #         date_gte=dates[0], date_lte=dates[1]
-        #     )
-        # else:
-        #     global_cases_url = get_abs_cases_url(date_gte=dates[0], date_lte=dates[1])
+        if chart_type == "Cummulative":
+            province_cases_url = get_country_cumm_cases_by_date_url(
+                dates[0], dates[1], country_info["alpha2"]
+            )
+        else:
+            province_cases_url = get_abs_cases_url(
+                dates[0], dates[1], "province", country_info["alpha2"]
+            )
 
-        # st.header("Global cases evolution")
+        cols: List[DeltaGenerator] = st.beta_columns(2)
 
-        # selection = alt.selection_multi(fields=["type"], bind="legend")
+        cols[0].header(f"{selected_country} cases evolution")
 
-        # base_chart: alt.Chart = self.get_chart_from_url(global_cases_url).mark_line(
-        #     point=False
-        # )
+        selection = alt.selection_multi(fields=["type"], bind="legend")
 
-        # if len(countries):
-        #     base_chart = base_chart.transform_filter(
-        #         alt.FieldOneOfPredicate("country", countries)
-        #     )
+        base_chart: alt.Chart = self.get_chart_from_url(province_cases_url).mark_line(
+            point=False
+        )
 
-        # chart = (
-        #     base_chart.transform_aggregate(
-        #         total_amount="sum(amount)", groupby=["date", "type"]
-        #     )
-        #     .encode(
-        #         x="yearmonthdate(date):T",
-        #         y="total_amount:Q",
-        #         tooltip=["date:T", "total_amount:Q"],
-        #         color=alt.Color(
-        #             "type:N",
-        #             scale=alt.Scale(
-        #                 domain=["confirmed", "dead", "recovered"],
-        #                 range=["orange", "red", "green"],
-        #             ),
-        #         ),
-        #     )
-        #     .transform_filter(selection)
-        #     .add_selection(selection)
-        #     .properties(height=500)
-        # )
+        if len(provinces):
+            base_chart = base_chart.transform_filter(
+                alt.FieldOneOfPredicate("province", provinces)
+            )
 
-        # st.altair_chart(chart, True)
+        chart = (
+            base_chart.transform_aggregate(
+                total_amount="sum(amount)", groupby=["date", "type"]
+            )
+            .encode(
+                x="yearmonthdate(date):T",
+                y="total_amount:Q",
+                tooltip=["date:T", "total_amount:Q"],
+                color=alt.Color(
+                    "type:N",
+                    scale=alt.Scale(
+                        domain=["confirmed", "dead", "recovered"],
+                        range=["orange", "red", "green"],
+                    ),
+                ),
+            )
+            .transform_filter(selection)
+            .add_selection(selection)
+            .properties(height=500)
+        )
 
-        # global_positives_country_url = get_global_cumm_cases_by_country_url(
-        #     date_gte=dates[0], date_lte=dates[1]
-        # )
+        cols[0].altair_chart(chart, True)
 
-        # base_chart = self.get_chart_from_url(global_positives_country_url)
+        province_positivies_url = get_global_cumm_cases_by_province_url(
+            dates[0], dates[1], country_info["alpha2"]
+        )
 
-        # if len(countries):
-        #     base_chart = base_chart.transform_filter(
-        #         alt.FieldOneOfPredicate("country", countries)
-        #     )
+        base_chart = self.get_chart_from_url(province_positivies_url)
 
-        # st.header("Global cases by country")
+        if len(provinces):
+            base_chart = base_chart.transform_filter(
+                alt.FieldOneOfPredicate("province", provinces)
+            )
 
-        # rank_num = (
-        #     st.number_input(
-        #         "Top N countries",
-        #         0,
-        #         len(countries) or len(all_countries),
-        #         len(countries) or 30,
-        #     )
-        #     or len(countries)
-        #     or len(all_countries)
-        # )
+        cols[1].header("Global cases by province")
 
-        # chart = (
-        #     base_chart.transform_aggregate(
-        #         sum_amount="sum(amount)", groupby=["country"]
-        #     )
-        #     .transform_window(
-        #         rank="rank(sum_amount)",
-        #         sort=[alt.SortField("sum_amount", order="descending")],
-        #     )
-        #     .transform_filter(datum.rank < rank_num + 1)
-        #     .mark_bar()
-        #     .encode(
-        #         x="sum_amount:Q",
-        #         y=alt.Y("country:N", sort="-x"),
-        #         tooltip=["sum_amount:Q"],
-        #         color="country:N",
-        #     )
-        #     .properties(height=900)
-        # )
+        chart = (
+            base_chart.transform_aggregate(
+                sum_amount="sum(amount)", groupby=["province"]
+            )
+            .mark_bar()
+            .encode(
+                x="sum_amount:Q",
+                y=alt.Y("province:N", sort="-x"),
+                tooltip=["sum_amount:Q"],
+                color="province:N",
+            )
+            .properties(height=500)
+        )
 
-        # st.altair_chart(chart, True)
+        cols[1].altair_chart(chart, True)

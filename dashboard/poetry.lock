@@ -170,6 +170,24 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "bokeh"
+version = "2.3.3"
+description = "Interactive plots and applications in the browser from Python"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Jinja2 = ">=2.9"
+numpy = ">=1.11.3"
+packaging = ">=16.8"
+pillow = ">=7.1.0"
+python-dateutil = ">=2.1"
+PyYAML = ">=3.10"
+tornado = ">=5.1"
+typing_extensions = ">=3.7.4"
+
+[[package]]
 name = "cachetools"
 version = "4.2.2"
 description = "Extensible memoizing collections and decorators"
@@ -923,7 +941,7 @@ python-versions = ">=3.6"
 name = "pyyaml"
 version = "5.4.1"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -1036,6 +1054,18 @@ tornado = ">=5.0"
 tzlocal = "*"
 validators = "*"
 watchdog = {version = "*", markers = "platform_system != \"Darwin\""}
+
+[[package]]
+name = "streamlit-bokeh-events"
+version = "0.1.2"
+description = "A custom streamlit component to return js event values from bokeh plots to streamlit"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+bokeh = ">=2.0.0"
+streamlit = ">=0.63"
 
 [[package]]
 name = "terminado"
@@ -1217,7 +1247,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "ba333afb6149df9eea198dd1a8c66d73899458e07d4bbe46032c50f25e0e637a"
+content-hash = "e95a0b77a30bca13b15e1b407edcf7a652cfd0d72595a8e48685bb9cdb1583d5"
 
 [metadata.files]
 altair = [
@@ -1294,6 +1324,9 @@ bleach = [
 ]
 blinker = [
     {file = "blinker-1.4.tar.gz", hash = "sha256:471aee25f3992bd325afa3772f1063dbdbbca947a041b8b89466dc00d606f8b6"},
+]
+bokeh = [
+    {file = "bokeh-2.3.3.tar.gz", hash = "sha256:a5fdcc181835561447fcc5a371300973fce4114692d5853addec284d1cdeb677"},
 ]
 cachetools = [
     {file = "cachetools-4.2.2-py3-none-any.whl", hash = "sha256:2cc0b89715337ab6dbba85b5b50effe2b0c74e035d83ee8ed637cf52f12ae001"},
@@ -1985,6 +2018,10 @@ stevedore = [
 streamlit = [
     {file = "streamlit-0.85.1-py2.py3-none-any.whl", hash = "sha256:a39832915624641482878558bf366be99d40fd460167e24c204e4c12f64fcf4f"},
     {file = "streamlit-0.85.1.tar.gz", hash = "sha256:b94b1ab701fee40826927834a080e35e16ef507d5b421132863a2e4c9d850429"},
+]
+streamlit-bokeh-events = [
+    {file = "streamlit-bokeh-events-0.1.2.tar.gz", hash = "sha256:47914b7778ac7ff56f34f3fedc2bb947fb7fcdad10c8187996d4a02c5f711e59"},
+    {file = "streamlit_bokeh_events-0.1.2-py3-none-any.whl", hash = "sha256:8c77fa0218ca25a5d8d76af4934bfbe3018458fc10a727f28a98326d57399d4d"},
 ]
 terminado = [
     {file = "terminado-0.10.1-py3-none-any.whl", hash = "sha256:c89ace5bffd0e7268bdcf22526830eb787fd146ff9d78691a0528386f92b9ae3"},
