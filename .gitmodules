@@ -1,0 +1,3 @@
+[submodule "data-loader"]
+	path = data-loader
+	url = git@github.com:alesanmed-educational-projects/covid-data.git
