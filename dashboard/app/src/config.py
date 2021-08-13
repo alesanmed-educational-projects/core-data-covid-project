@@ -1,2 +1,5 @@
+import os
+
+
 class Config(object):
-    BACK_URL: str = "http://localhost:5000"
+    BACK_URL: str = os.environ.get("BACK_URL", "")
