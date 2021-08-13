@@ -4,11 +4,64 @@ Este proyecto contiene el backend de la aplicación. Aquí es donde ocurre toda 
 
 Este proyecto usa el paquete de covid-data para acceder a las queries.
 
+## Ejecución
+
+Para poder ejecutar este dashboard lo primero es descargar el código. Luego se puede ejecutar con Docker o sin él.
+
+### Docker
+
+Símplemente levantar el docker-compose:
+
+```
+docker-compose up --build
+```
+
+### Local
+
+Primero hay que instalar las dependencias con:
+
+```
+pip install -r requirements.txt
+```
+
+O, si usas [Poetry](https://python-poetry.org/):
+
+```
+poetry install
+```
+
+Una vez las dependencias están instaladas, puedes ejecutar el servidor como tal:
+
+```
+FLASK_APP=covid-backend flask run
+```
+
+## Configuración
+
+El proyecto se vale de las siguientes variables de entorno para su configuración:
+
+- POSTGRES_USER: Usuario de Postgres
+- POSTGRES_PASS: Contraseña de Postgres
+- POSTGRES_HOST: Host de Postgres
+- POSTGRES_PORT: Puerto de Postgres
+- POSTGRES_DB: Base de datos
+- SENDGRID_KEY: API Key de Sendgrid para mandar emails
+
+## Endpoints
+
+### Autenticación
+
+Los endpoints marcados con `[A]` requieren autenticación. Para autenticarse, es necesario mandar un `Bearer Token` en la cabecera.
+
+Ese token se puede generar como se explica [aquí](#api_key).
+
+### Endpoints
+
 Los endpoints que expone esta API son:
 
-`POST /auth`
+`[A] POST /auth`
 
-Authorization: Bearer token. Comprueba si una API key es válida
+Comprueba si una API key es válida. No admite cuerpo
 
 `GET /cases`
 
@@ -33,7 +86,7 @@ Devuelve los países acorde a una serie de filtros opcionales. A saber:
 - `name`: Nombre del país
 - `near`: Latitud y longitud, separadas por comas. Los resultados saldrán ordenados acorde a la distancia del país a ese punto.
 
-`POST /countries`
+`[A] POST /countries`
 
 Crea un país con los datos pasados en el cuerpo. El formato es JSON y todos los campos son obligatorios:
 
@@ -58,7 +111,7 @@ Envía un email con el PDF enviado en el POST. Debe ser un `form-data` con el PD
 `GET /provinces`
 Devuelve todas las provincias
 
-## Crear una API Key
+## Crear una API Key <a name="api_key"></a>
 
 Para poder crear un país hace falta mandar una API Key en las cabeceras. Para generar esta clave se debe ejecutar el comando:
 
