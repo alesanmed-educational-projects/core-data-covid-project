@@ -5,10 +5,22 @@ Este proyecto contiene las herramientas necesarias para:
 - Cargar datos en esa base de datos
 - Consultar esos datos
 
+## Opciones de configuración
+
+Este proyecto se vale de las siguientes variables de entorno para su configuración:
+
+```
+POSTGRES_USER: Usuario de Postgree
+POSTGRES_PASS: Contraseña de Postgres
+POSTGRES_HOST: Host donde se encuentra Postgres
+POSTGRES_PORT: Puerto para acceder a Postgres
+POSTGRES_DB:   Base de datos a la que conectarse
+CAGEDATA_API_KEY: Clave api de OpenCageData para enriquecer datos con localizaciones
+```
+
 Este proyecto se puede usar de 2 formas.
 
 ## Como CLI
-
 
 Para cargar los datos se puede usar como CLI. Lo primero será crear la base de datos con el esquema disponible en [a relative link](covid_data/db/schema/db_schema.sql). La estructura de la base de datos es la siguiente:
 
@@ -126,8 +138,7 @@ def scrap(db_engine: psycopg2._psycopg.connection, start_date: datetime.datetime
 
 ## Como biblioteca
 
-La parte más interesante de este paquete como biblioteca es el sumbódulo de queries, qeu se detalla a continuación.
-
+La parte más interesante de este paquete como biblioteca es el sumbódulo `db`, que se detalla a continuación.
 ### Glossary
 - `connection: psycopg2._psycopg.connection`
 - `CaseType: covid_data.types.CaseType`
@@ -139,94 +150,154 @@ La parte más interesante de este paquete como biblioteca es el sumbódulo de qu
 - `PlaceTable: covid_data.types.PlaceTable`
 - `PlaceType: covid_data.types.PlaceType`
 
+### `covid_data.db`
 
+```python
+def get_db(
+    user: str = None,
+    passwd: str = None,
+    host: str = None,
+    port: str = None,
+    db: str = None,
+) -> connection:
+```
+
+Devuelve una conexión a la base de datos. Esta conexión debe ser cerrada manualmente al terminar. La configuración de la conexión se puede pasar directamente al método (si se usa como biblioteca) o por variables de entorno (si se usa como CLI). Las variables de entorno son las siguientes:
+
+```env
+POSTGRES_USER
+POSTGRES_PASS
+POSTGRES_HOST
+POSTGRES_PORT
+POSTGRES_DB
+```
+
+```python
+def close_db(conn: connection) -> Callable
+```
+
+Recibe una conexión y devuelve una lambda que cierra la conexión al ser llamada. Esto se hace así para poder pasarle esta función como callback al `ExitStack` y poder cerrarla automáticamente al finalizar una función.
+
+## `covid_data.db.queries`
 
 ```python
 def place_exists(
     place: str, engine: connection, table: PlaceTable = PlaceTable.COUNTRY
 ) -> Union[str, None]:
-"""Given a place name and a table, returns its ID or none if not exits"""
+"""
+Given a place name and a table, returns its ID or none if not exits
+"""
 ```
 
 ```python
 def get_country_by_alpha2(country: str, engine: connection) -> Optional[dict]:
-"""Given an alpha2 code, return a country"""
+"""
+Given an alpha2 code, return a country
+"""
 ```
 
 ```python
 def get_country_by_alpha3(country: str, engine: connection) -> Optional[dict]:
-"""Given an alpha3 code, return a country"""
+"""
+Given an alpha3 code, return a country
+"""
 ```
 
 ```python
 def get_province_by_alpha2(province: str, engine: connection) -> Optional[dict]:
-"""Given an alpha2 code, return a province"""
+"""
+Given an alpha2 code, return a province
+"""
 ```
 
 ```python
 def get_county_by_alpha2(county: str, engine: connection) -> Optional[dict]:
-"""Given an alpha2 code, return a county"""
+"""
+Given an alpha2 code, return a county
+"""
 ```
 
 ```python
 def get_country_by_id(country_id: str, engine: connection) -> Optional[dict]:
-"""Given an id, return a country"""
+"""
+Given an id, return a country
+"""
 ```
 
 ```python
 def get_province_by_id(province_id: str, engine: connection) -> Optional[dict]:
-"""Given an id, return a province"""
+"""
+Given an id, return a province
+"""
 ```
 
 ```python
 def get_province_by_name(province: str, engine: connection) -> Optional[dict]:
-"""Given a name, return a country"""
+"""
+Given a name, return a country
+"""
 ```
 
 ```python
 def get_county_by_id(county_id: str, engine: connection) -> Optional[dict]:
-"""Given an id, return a county"""
+"""
+Given an id, return a county
+"""
 ```
 
 ```python
 def row_to_dict(
     rows: Iterable, table_or_cols: Union[str, Iterable[str]], engine: connection
 ) -> list[dict]:
-"""Given an array of rows and a table or a column lists, transform the rows to an array of dicts, with columns as keys"""
+"""
+Given an array of rows and a table or a column lists, transform the rows to an array of dicts, with columns as keys
+"""
 ```
 
 ```python
 def ensure_array(element) -> List:
-"""Given an object, ensure it's an array"""
+"""
+Given an object, ensure it's an array
+"""
 ```
 
 ```python
 def create_country(country: dict, engine: connection) -> str:
-"""Given a dict with all country data, insert it in the database"""
+"""
+Given a dict with all country data, insert it in the database
+"""
 ```
 
 ```python
 def create_province(province: dict, engine: connection) -> str:
-"""Given a dict with all province data, insert it in the database"""
+"""
+Given a dict with all province data, insert it in the database
+"""
 ```
 
 ```python
 def create_county(county: dict, engine: connection) -> str:
-"""Given a dict with all county data, insert it in the database"""
+"""
+Given a dict with all county data, insert it in the database
+"""
 ```
 
 ```python
 def get_cases_by_country(
     country_id: int, engine: connection, case_type: CaseType = None
 ) -> List[Dict]:
-"""Given a dict with all country data, insert it in the database"""
+"""
+Given a dict with all country data, insert it in the database
+"""
 ```
 
 ```python
 def get_cases_by_province(
     province_id: int, engine: connection, case_type: CaseType = None
 ) -> List[Dict]:
-"""Given a province id, return all the cases from that provicen, filtered by type if provided"""
+"""
+Given a province id, return all the cases from that provicen, filtered by type if provided
+"""
 ```
 
 ```python

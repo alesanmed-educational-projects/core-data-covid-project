@@ -1,4 +1,5 @@
 import os
+from typing import Callable
 
 from psycopg2 import connect
 from psycopg2._psycopg import connection  # pylint: disable=no-name-in-module
@@ -24,7 +25,7 @@ def get_db(
     )
 
 
-def close_db(conn: connection):
+def close_db(conn: connection) -> Callable:
     return lambda *args, **kwargs: conn.close()
 
 
