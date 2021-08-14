@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from logging import getLogger
 
 import flask
 from flask import Response, json
@@ -27,6 +28,8 @@ def handle_exception(e):
 
 @bp.app_errorhandler(Exception)
 def handle_generic_exception(e):
+    logger = getLogger("covid-backend")
+    logger.error(e)
     data = json.dumps(
         {
             "code": 500,
