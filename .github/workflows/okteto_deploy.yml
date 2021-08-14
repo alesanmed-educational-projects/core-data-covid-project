@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  devflow:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@master
+
+    - name: Login
+      uses: okteto/login@master
+      with:
+        token: ${{ secrets.OKTETO_TOKEN }}
+
+    - name: "Activate Namespace"
+      uses: okteto/namespace@master
+      with:
+        name: alesanmed
+
+    - name: "Trigger the pipeline"
+      uses: okteto/pipeline@master
+      with:
+        name: push-${{ github.event.number }}
+        timeout: 8m
+        skipIfExists: true
