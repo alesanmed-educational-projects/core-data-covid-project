@@ -10,4 +10,4 @@ ADD . /covid-dashboard
 
 EXPOSE $FRONT_PORT
 
-CMD streamlit run --browser.serverAddress $SERVER_ADDRESS --browser.serverPort 443 --server.port $FRONT_PORT --server.address 0.0.0.0 --server.headless true app/main.py
+CMD streamlit run app/main.py
