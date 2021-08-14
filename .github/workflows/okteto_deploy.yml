@@ -20,7 +20,7 @@ jobs:
     - name: "Activate Namespace"
       uses: okteto/namespace@master
       with:
-        name: alesanmed
+        namespace: alesanmed
 
     - name: "Trigger the pipeline"
       uses: okteto/pipeline@master
