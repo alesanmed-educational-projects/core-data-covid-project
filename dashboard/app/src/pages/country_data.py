@@ -35,6 +35,7 @@ TOPOJSON_MAP = {
         ),
         "property": "ESP_adm1",
         "key": "properties.HASC_1",
+        "show": "properties.NAME_1",
     },
     "Canada": {
         "url": (
@@ -45,6 +46,7 @@ TOPOJSON_MAP = {
         ),
         "property": "canadaprov",
         "key": "id",
+        "show": "properties.name",
     },
 }
 
@@ -182,7 +184,9 @@ class CountryData(Page):
                 .encode(
                     color="amount:Q",
                     tooltip=[
-                        alt.Tooltip("properties.NAME_1:N", title="State"),
+                        alt.Tooltip(
+                            f"{TOPOJSON_MAP[selected_country]['show']}:N", title="State"
+                        ),
                         alt.Tooltip("amount:Q", title="Amount rate", format=".2%"),
                     ],
                 )
@@ -226,7 +230,7 @@ class CountryData(Page):
             )
         else:
             province_cases_url = get_abs_cases_url(
-                dates[0], dates[1], "province", country_info["alpha2"]
+                dates[0], dates[1], "province", [country_info["alpha2"]]
             )
 
         if st.session_state.get("pdf_export", False):

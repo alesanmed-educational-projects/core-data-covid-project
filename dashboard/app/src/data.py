@@ -1,8 +1,10 @@
 from datetime import datetime
+from typing import Iterable, Optional
 
 import pandas as pd
 import requests
 import streamlit as st
+from pandas._typing import ArrayLike
 
 from .config import Config
 
@@ -30,8 +32,8 @@ def get_cases_url(date_gte: datetime, date_lte: datetime) -> str:
 def get_abs_cases_url(
     date_gte: datetime,
     date_lte: datetime,
-    agg_place: str = "country",
-    country_code: str = None,
+    agg_place: Optional[str],
+    countries: Iterable[str],
 ) -> str:
     URL = Config().BACK_URL
 
@@ -39,16 +41,18 @@ def get_abs_cases_url(
         f"{URL}/cases"
         f"?date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
-        f"&agg={agg_place}"
         "&agg=date"
         "&agg=type"
     )
 
-    if agg_place == "province":
-        full_url = f"{full_url}&agg=province_code"
+    if agg_place:
+        if agg_place == "province":
+            full_url = f"{full_url}&agg=province_code"
+        elif agg_place == "country":
+            full_url = f"{full_url}&agg=country"
 
-    if country_code:
-        full_url = f"{full_url}&country={country_code}"
+    if countries:
+        full_url = f"{full_url}" + f"&country={'&country='.join(countries)}"
 
     return full_url
 
@@ -60,8 +64,8 @@ def get_global_cases_normalized(
 
     full_url = (
         f"{URL}/cases"
-        f"?date[gte]={date_gte}"
-        f"&date[lte]={date_lte}"
+        f"?date[gte]={date_gte.strftime('%d-%m-%Y')}"
+        f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
         "&agg=country"
         "&agg=type"
         "&normalize=1"
@@ -91,8 +95,8 @@ def get_country_cases_normalized(
 
     full_url = (
         f"{URL}/cases"
-        f"?date[gte]={date_gte}"
-        f"&date[lte]={date_lte}"
+        f"?date[gte]={date_gte.strftime('%d-%m-%Y')}"
+        f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
         "&agg=province"
         "&agg=type"
         "&agg=province_code"
@@ -131,13 +135,16 @@ def get_max_date_data() -> datetime:
     return _get_max_min_date_data(True)
 
 
-def get_global_cumm_cases_by_date_url(date_gte: datetime, date_lte: datetime) -> str:
+def get_global_cumm_cases_by_date_url(
+    date_gte: datetime, date_lte: datetime, countries: Iterable[str] = []
+) -> str:
     URL = Config().BACK_URL
 
     full_url = (
         f"{URL}/cases?resultType=cummulativeDate"
         f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
+        f"&country={'&country='.join(countries)}"
     )
 
     return full_url
@@ -168,13 +175,16 @@ def get_country_cumm_cases_by_date_url(
     return full_url
 
 
-def get_global_cumm_cases_by_country_url(date_gte: datetime, date_lte: datetime) -> str:
+def get_global_cumm_cases_by_country_url(
+    date_gte: datetime, date_lte: datetime, countries: ArrayLike
+) -> str:
     URL = Config().BACK_URL
 
     full_url = (
         f"{URL}/cases?resultType=cummulativeCountry"
         f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
+        f"&country={'&country='.join(countries)}"
     )
 
     return full_url
@@ -196,12 +206,12 @@ def get_global_cumm_cases_by_province_url(
 
 
 @st.cache
-def get_all_countries() -> list[str]:
+def get_all_countries() -> list[dict]:
     URL = Config().BACK_URL
 
     full_url = f"{URL}/countries"
 
-    return [c["name"] for c in requests.get(full_url).json()]
+    return requests.get(full_url).json()
 
 
 @st.cache

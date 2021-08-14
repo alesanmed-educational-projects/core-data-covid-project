@@ -1,6 +1,7 @@
 from typing import List
 
 import altair as alt
+import pandas as pd
 import streamlit as st
 from altair import datum
 from streamlit.delta_generator import DeltaGenerator
@@ -63,17 +64,29 @@ class GeneralData(Page):
             value=[min_date, max_date],
         )
 
+        if len(dates) < 2:
+            st.stop()
+
         chart_type = cols[1].selectbox("Chart type", ["Cummulative", "Absolute"], 0)
 
-        all_countries = get_all_countries()
-        countries = cols[2].multiselect("Countries", all_countries)
+        all_countries = pd.DataFrame.from_records(get_all_countries())
+
+        countries = cols[2].multiselect(
+            "Countries", all_countries["name"].unique().tolist()
+        )
+
+        countries_alpha = all_countries[all_countries["name"].isin(countries)][
+            "alpha2"
+        ].values
 
         if chart_type == "Cummulative":
             global_cases_url = get_global_cumm_cases_by_date_url(
-                date_gte=dates[0], date_lte=dates[1]
+                dates[0], dates[1], countries_alpha
             )
         else:
-            global_cases_url = get_abs_cases_url(date_gte=dates[0], date_lte=dates[1])
+            global_cases_url = get_abs_cases_url(
+                dates[0], dates[1], None, countries_alpha
+            )
 
         st.header("Global cases evolution")
 
@@ -82,11 +95,6 @@ class GeneralData(Page):
         base_chart: alt.Chart = self.get_chart_from_url(global_cases_url).mark_line(
             point=False
         )
-
-        if len(countries):
-            base_chart = base_chart.transform_filter(
-                alt.FieldOneOfPredicate("country", countries)
-            )
 
         chart = (
             base_chart.transform_aggregate(
@@ -112,15 +120,10 @@ class GeneralData(Page):
         st.altair_chart(chart, True)
 
         global_positives_country_url = get_global_cumm_cases_by_country_url(
-            date_gte=dates[0], date_lte=dates[1]
+            dates[0], dates[1], countries_alpha
         )
 
         base_chart = self.get_chart_from_url(global_positives_country_url)
-
-        if len(countries):
-            base_chart = base_chart.transform_filter(
-                alt.FieldOneOfPredicate("country", countries)
-            )
 
         st.header("Global cases by country")
 
