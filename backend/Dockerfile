@@ -15,9 +15,9 @@ RUN pip install -r requirements.txt
 
 ADD . /covid-back
 
-EXPOSE $PORT
+EXPOSE $BACK_PORT
 
 ENV FLASK_APP=covid-backend
 ENV FLASK_ENV=production
 
-CMD gunicorn --bind 0.0.0.0:$PORT --access-logfile - --log-level debug covid-backend.wsgi:app
+CMD gunicorn --bind 0.0.0.0:$BACK_PORT --access-logfile - --log-level debug covid-backend.wsgi:app

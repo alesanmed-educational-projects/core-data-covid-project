@@ -8,6 +8,6 @@ RUN pip install -r requirements.txt
 
 ADD . /covid-dashboard
 
-EXPOSE $PORT
+EXPOSE $FRONT_PORT
 
-CMD streamlit run --server.enableXsrfProtection false --server.enableCORS false --server.port $PORT --server.headless true app/main.py
+CMD streamlit run --browser.serverAddress $SERVER_ADDRESS --server.port $FRONT_PORT --server.headless true app/main.py
