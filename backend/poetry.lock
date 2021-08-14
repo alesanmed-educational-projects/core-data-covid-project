@@ -110,7 +110,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "covid-data"
-version = "0.1.13"
+version = "0.1.14"
 description = "Data loader part of the mid-project for the Data Science bootcamp from Core Code School"
 category = "main"
 optional = false
@@ -555,7 +555,7 @@ colorama = [
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
 ]
 covid-data = [
-    {file = "covid_data-0.1.13.tar.gz", hash = "sha256:27bdfe5367632a792e4b34fc31ca158370e661d1cd767f43b4deb9687823e270"},
+    {file = "covid_data-0.1.14.tar.gz", hash = "sha256:391a5c8bf46db8637bcf1b5cdd39e1ec5f5117727276eaf8188ae1aba554fed9"},
 ]
 flake8 = [
     {file = "flake8-3.9.2-py2.py3-none-any.whl", hash = "sha256:bf8fd333346d844f616e8d47905ef3a3384edae6b4e9beb0c5101e25e3110907"},
