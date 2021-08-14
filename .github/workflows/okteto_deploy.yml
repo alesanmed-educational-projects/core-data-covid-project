@@ -22,9 +22,7 @@ jobs:
       with:
         namespace: alesanmed
 
-    - name: "Trigger the pipeline"
-      uses: okteto/pipeline@master
+    - name: "Create stack"
+      uses: okteto/deploy-stack@master
       with:
-        name: push-${{ github.event.number }}
-        timeout: 8m
-        skipIfExists: true
+        build: "true"
