@@ -27,7 +27,7 @@ services:
     networks:
       - backend
       - frontend
-   frontend:
+  frontend:
     build: ./dashboard
     ports:
       - "443:443"
