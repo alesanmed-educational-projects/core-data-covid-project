@@ -30,12 +30,13 @@ services:
   frontend:
     build: ./dashboard
     ports:
-      - "443:443"
+      - "8501:8501"
     networks:
       - frontend
     environment:
-      - FRONT_PORT=443
+      - FRONT_PORT=8501
       - SERVER_ADDRESS=${SERVER_ADDRESS}
+      - BACK_URL=${BACK_URL}
 
 networks:
   backend:
