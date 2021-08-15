@@ -3,15 +3,13 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Optional
 
-from covid_data.db.queries import (
-    get_cases_by_filters,
-    get_countries_id_by_alpha2,
-    get_cum_cases_by_country,
-    get_cum_cases_by_date,
-    get_cum_cases_by_date_country,
-    get_cum_cases_by_province,
-    get_province_by_name,
-)
+from covid_data.db.queries import (get_cases_by_filters,
+                                   get_countries_id_by_alpha2,
+                                   get_cum_cases_by_country,
+                                   get_cum_cases_by_date,
+                                   get_cum_cases_by_date_country,
+                                   get_cum_cases_by_province,
+                                   get_province_by_name)
 from covid_data.types import Aggregations, CaseType
 from flask import Blueprint, request
 from flask.wrappers import Response
@@ -32,6 +30,7 @@ def get_cases():
     args["sort"] = request.args.getlist("sort") or []
     args["agg"] = request.args.getlist("agg") or []
     args["countries"] = list(filter(len, (request.args.getlist("country") or [])))
+    args["provinces"] = list(filter(len, (request.args.getlist("province") or [])))
 
     case_type: Optional[str]
 
@@ -69,8 +68,6 @@ def get_cases():
             if len(country) != 2:
                 raise exceptions.BadRequest(f"Country {country} is not an Alpha2 code")
 
-    province = args.get("province", None)
-
     date = None
     date_lte = None
     date_gte = None
@@ -102,14 +99,13 @@ def get_cases():
 
     countries_id = get_countries_id_by_alpha2(countries, db) if len(countries) else []
 
-    province_id = None
-    if province:
-        province = get_province_by_name(province, db)
+    provinces_id = []
+    if len(provinces := args.get("provinces", [])):
+        for province in provinces:
+            province = get_province_by_name(province, db)
 
-        if not province:
-            return []
-
-        province_id = province["id"]
+            if province:
+                provinces_id.append(province["id"])
 
     if limit := args.get("limit", None):
         try:
@@ -129,7 +125,7 @@ def get_cases():
                 "A country is required when requesting this type of result"
             )
         cases = get_cum_cases_by_date_country(
-            db, countries_id[0], date, date_lte, date_gte, case_type_fix
+            db, countries_id[0], provinces_id, date, date_lte, date_gte, case_type_fix
         )
     elif result_type_fix is ResultType.CUMMULATIVE_PROVINCE:
         if not len(countries_id):
@@ -137,7 +133,7 @@ def get_cases():
                 "A country is required when requesting this type of result"
             )
         cases = get_cum_cases_by_province(
-            db, date, date_lte, date_gte, case_type_fix, countries_id[0]
+            db, date, date_lte, date_gte, case_type_fix, countries_id[0], provinces_id
         )
     elif result_type_fix:
         cases = get_cum_cases_by_country(
@@ -147,7 +143,7 @@ def get_cases():
         cases = get_cases_by_filters(
             db,
             countries_id,
-            province_id,
+            provinces_id,
             date,
             date_lte,
             date_gte,

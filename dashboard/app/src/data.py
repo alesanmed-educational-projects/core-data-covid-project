@@ -21,20 +21,23 @@ def get_global_cases_by_type() -> pd.DataFrame:
     return data
 
 
-def get_cases_url(date_gte: datetime, date_lte: datetime) -> str:
+def get_cases(date_gte: datetime, date_lte: datetime) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = f"{URL}/cases?date[gte]={date_gte.strftime('%d-%m-%Y')}&date[lte]={date_lte.strftime('%d-%m-%Y')}"
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
-def get_abs_cases_url(
+def get_abs_cases(
     date_gte: datetime,
     date_lte: datetime,
     agg_place: Optional[str],
-    countries: Iterable[str],
-) -> str:
+    countries: Iterable[str] = None,
+    provinces: Iterable[str] = None,
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -51,15 +54,20 @@ def get_abs_cases_url(
         elif agg_place == "country":
             full_url = f"{full_url}&agg=country"
 
-    if countries:
+    if countries is not None:
         full_url = f"{full_url}" + f"&country={'&country='.join(countries)}"
 
-    return full_url
+    if provinces is not None:
+        full_url = f"{full_url}" + f"&province={'&province='.join(provinces)}"
+
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 def get_global_cases_normalized(
     date_gte: datetime, date_lte: datetime, case_type: str = None
-) -> str:
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -74,7 +82,9 @@ def get_global_cases_normalized(
     if case_type:
         full_url = f"{full_url}&type={case_type}"
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 def get_country(country_name: str) -> dict:
@@ -88,7 +98,7 @@ def get_country(country_name: str) -> dict:
 
 def get_country_cases_normalized(
     date_gte: datetime, date_lte: datetime, country: str, case_type: str = None
-) -> str:
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     country_info = get_country(country)[0]
@@ -107,7 +117,9 @@ def get_country_cases_normalized(
     if case_type:
         full_url = f"{full_url}&type={case_type}"
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 @st.cache
@@ -135,9 +147,9 @@ def get_max_date_data() -> datetime:
     return _get_max_min_date_data(True)
 
 
-def get_global_cumm_cases_by_date_url(
+def get_global_cumm_cases_by_date(
     date_gte: datetime, date_lte: datetime, countries: Iterable[str] = []
-) -> str:
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -147,7 +159,9 @@ def get_global_cumm_cases_by_date_url(
         f"&country={'&country='.join(countries)}"
     )
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 def get_closest_country(lat, long) -> dict:
@@ -160,9 +174,12 @@ def get_closest_country(lat, long) -> dict:
     return country_res.json()[0]
 
 
-def get_country_cumm_cases_by_date_url(
-    date_gte: datetime, date_lte: datetime, country_code: str
-) -> str:
+def get_country_cumm_cases_by_date(
+    date_gte: datetime,
+    date_lte: datetime,
+    country_code: str,
+    provinces: Iterable[str] = [],
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -170,14 +187,17 @@ def get_country_cumm_cases_by_date_url(
         f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
         f"&country={country_code}"
+        f"&province={'&province='.join(provinces)}"
     )
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
-def get_global_cumm_cases_by_country_url(
+def get_global_cumm_cases_by_country(
     date_gte: datetime, date_lte: datetime, countries: ArrayLike
-) -> str:
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -187,12 +207,14 @@ def get_global_cumm_cases_by_country_url(
         f"&country={'&country='.join(countries)}"
     )
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
-def get_global_cumm_cases_by_province_url(
-    date_gte: datetime, date_lte: datetime, country: str
-) -> str:
+def get_global_cumm_cases_by_province(
+    date_gte: datetime, date_lte: datetime, country: str, provinces
+) -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = (
@@ -200,18 +222,23 @@ def get_global_cumm_cases_by_province_url(
         f"&date[gte]={date_gte.strftime('%d-%m-%Y')}"
         f"&date[lte]={date_lte.strftime('%d-%m-%Y')}"
         f"&country={country}"
+        f"&province={'&province='.join(provinces)}"
     )
 
-    return full_url
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 @st.cache
-def get_all_countries() -> list[dict]:
+def get_all_countries() -> pd.DataFrame:
     URL = Config().BACK_URL
 
     full_url = f"{URL}/countries"
 
-    return requests.get(full_url).json()
+    data = pd.DataFrame.from_records(requests.get(full_url).json())
+
+    return data
 
 
 @st.cache

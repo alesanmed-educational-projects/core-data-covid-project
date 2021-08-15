@@ -7,12 +7,12 @@ from altair import datum
 from streamlit.delta_generator import DeltaGenerator
 
 from ..data import (
-    get_abs_cases_url,
+    get_abs_cases,
     get_all_countries,
     get_global_cases_by_type,
     get_global_cases_normalized,
-    get_global_cumm_cases_by_country_url,
-    get_global_cumm_cases_by_date_url,
+    get_global_cumm_cases_by_country,
+    get_global_cumm_cases_by_date,
     get_max_date_data,
     get_min_date_data,
 )
@@ -20,10 +20,6 @@ from ..utils import Page
 
 
 class GeneralData(Page):
-    @st.cache
-    def get_chart_from_url(self, url: str) -> alt.Chart:
-        return alt.Chart(url)
-
     @st.cache
     def get_topo(self, url: str) -> alt.UrlData:
         return alt.topo_feature(url, "countries")
@@ -80,21 +76,19 @@ class GeneralData(Page):
         ].values
 
         if chart_type == "Cummulative":
-            global_cases_url = get_global_cumm_cases_by_date_url(
+            global_cases = get_global_cumm_cases_by_date(
                 dates[0], dates[1], countries_alpha
             )
         else:
-            global_cases_url = get_abs_cases_url(
-                dates[0], dates[1], None, countries_alpha
+            global_cases = get_abs_cases(
+                dates[0], dates[1], None, countries_alpha, None
             )
 
         st.header("Global cases evolution")
 
         selection = alt.selection_multi(fields=["type"], bind="legend")
 
-        base_chart: alt.Chart = self.get_chart_from_url(global_cases_url).mark_line(
-            point=False
-        )
+        base_chart: alt.Chart = alt.Chart(global_cases).mark_line(point=False)
 
         chart = (
             base_chart.transform_aggregate(
@@ -119,11 +113,11 @@ class GeneralData(Page):
 
         st.altair_chart(chart, True)
 
-        global_positives_country_url = get_global_cumm_cases_by_country_url(
+        global_positives_country = get_global_cumm_cases_by_country(
             dates[0], dates[1], countries_alpha
         )
 
-        base_chart = self.get_chart_from_url(global_positives_country_url)
+        base_chart: alt.Chart = alt.Chart(global_positives_country)
 
         st.header("Global cases by country")
 
@@ -168,7 +162,7 @@ class GeneralData(Page):
 
         st.header(f"Countries contribution rate to {case_type} cases")
 
-        global_cases_url = get_global_cases_normalized(dates[0], dates[1], case_type)
+        global_cases = get_global_cases_normalized(dates[0], dates[1], case_type)
 
         # Layering and configuring the components
         chart = (
@@ -184,7 +178,7 @@ class GeneralData(Page):
             .transform_lookup(
                 lookup="properties.name",
                 from_=alt.LookupData(
-                    alt.UrlData(global_cases_url, alt.JsonDataFormat()),
+                    global_cases,
                     "country",
                     ["amount"],
                 ),

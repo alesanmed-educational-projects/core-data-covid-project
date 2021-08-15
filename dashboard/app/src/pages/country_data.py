@@ -11,14 +11,14 @@ from streamlit.delta_generator import DeltaGenerator
 from streamlit_bokeh_events import streamlit_bokeh_events
 
 from ..data import (
-    get_abs_cases_url,
+    get_abs_cases,
     get_all_provinces,
     get_closest_country,
     get_countries_with_province,
     get_country,
     get_country_cases_normalized,
-    get_country_cumm_cases_by_date_url,
-    get_global_cumm_cases_by_province_url,
+    get_country_cumm_cases_by_date,
+    get_global_cumm_cases_by_province,
     get_max_date_data,
     get_min_date_data,
     send_pdf_to_email,
@@ -56,10 +56,6 @@ class CountryData(Page):
     TITLE_FONT = ["Arial", "b", 16]
     SUBTITLE_FONT = ["Arial", "b", 14]
     BODY_FONT = ["Arial", "", 11]
-
-    @st.cache
-    def get_chart_from_url(self, url: str) -> alt.Chart:
-        return alt.Chart(url)
 
     @st.cache
     def get_topo(self, url: str, property) -> alt.UrlData:
@@ -173,7 +169,7 @@ class CountryData(Page):
 
             st.header(contribution_title)
 
-            country_cases_url = get_country_cases_normalized(
+            country_cases = get_country_cases_normalized(
                 dates[0], dates[1], selected_country, case_type
             )
 
@@ -193,7 +189,7 @@ class CountryData(Page):
                 .transform_lookup(
                     lookup=TOPOJSON_MAP[selected_country]["key"],
                     from_=alt.LookupData(
-                        alt.UrlData(country_cases_url, alt.JsonDataFormat()),
+                        country_cases,
                         "province_code",
                         ["amount"],
                     ),
@@ -225,12 +221,12 @@ class CountryData(Page):
         provinces = cols[1].multiselect(selected_provinces_title, all_provinces)
 
         if chart_type == "Cummulative":
-            province_cases_url = get_country_cumm_cases_by_date_url(
-                dates[0], dates[1], country_info["alpha2"]
+            province_cases = get_country_cumm_cases_by_date(
+                dates[0], dates[1], country_info["alpha2"], provinces
             )
         else:
-            province_cases_url = get_abs_cases_url(
-                dates[0], dates[1], "province", [country_info["alpha2"]]
+            province_cases = get_abs_cases(
+                dates[0], dates[1], None, [country_info["alpha2"]], provinces=provinces
             )
 
         if st.session_state.get("pdf_export", False):
@@ -252,23 +248,13 @@ class CountryData(Page):
 
         selection = alt.selection_multi(fields=["type"], bind="legend")
 
-        base_chart: alt.Chart = self.get_chart_from_url(province_cases_url).mark_line(
-            point=False
-        )
-
-        if len(provinces):
-            base_chart = base_chart.transform_filter(
-                alt.FieldOneOfPredicate("province", provinces)
-            )
+        base_chart: alt.Chart = alt.Chart(province_cases).mark_line(point=False)
 
         chart = (
-            base_chart.transform_aggregate(
-                total_amount="sum(amount)", groupby=["date", "type"]
-            )
-            .encode(
+            base_chart.encode(
                 x="yearmonthdate(date):T",
-                y="total_amount:Q",
-                tooltip=["date:T", "total_amount:Q"],
+                y="amount:Q",
+                tooltip=["date:T", "amount:Q"],
                 color=alt.Color(
                     "type:N",
                     scale=alt.Scale(
@@ -289,16 +275,11 @@ class CountryData(Page):
             self.pdf.cell(0, 20, country_header_title, 0, 1)
             self.pdf.image("./assets/country_evolution.png", w=180)
 
-        province_positivies_url = get_global_cumm_cases_by_province_url(
-            dates[0], dates[1], country_info["alpha2"]
+        province_cases = get_global_cumm_cases_by_province(
+            dates[0], dates[1], country_info["alpha2"], provinces
         )
 
-        base_chart = self.get_chart_from_url(province_positivies_url)
-
-        if len(provinces):
-            base_chart = base_chart.transform_filter(
-                alt.FieldOneOfPredicate("province", provinces)
-            )
+        base_chart: alt.Chart = alt.Chart(province_cases)
 
         cols[1].header(province_header_title)
 
