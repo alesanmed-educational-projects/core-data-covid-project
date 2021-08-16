@@ -14,6 +14,8 @@ Bienvenido a mi proyecto de data del bootcamp de [CORE](https://www.corecode.sch
 
 Este proyecto intenta cargar, procesar y mostrar ciertos datos relacionados con la COVID.
 
+### Puedes acceder al proyecto [aqui](https://frontend-alesanmed.cloud.okteto.net/)
+
 # Table of contents
 
 - [Las cositas del COVID](#las-cositas-del-covid)
