@@ -33,9 +33,9 @@ Este proyecto intenta cargar, procesar y mostrar ciertos datos relacionados con 
 
 Este proyecto consta de varias partes, cada una con su propio README específico. Estas piezas son:
 
-1. `covid-data`
-2. `flask-backend`
-3. `streamlit-dashboard`
+1. [covid-data](https://github.com/alesanmed-educational-projects/covid-data)
+2. [flask-backend](backend)
+3. [streamlit-dashboard](dashboard)
 
 ### COVID-data 🤖 <a name="covid-data"></a>
 
