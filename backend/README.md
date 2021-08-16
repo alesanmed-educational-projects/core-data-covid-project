@@ -1,22 +1,35 @@
-# Backend
+# COVID-backend
+![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
 
 Este proyecto contiene el backend de la aplicación. Aquí es donde ocurre toda la magia.
 
-Este proyecto usa el paquete de covid-data para acceder a las queries.
+En el backend se usa el paquete [covid-data](https://pypi.org/project/covid-data/) para acceder a las queries para manejar y pedir datos a la base de datos.
 
-## Ejecución
+# Table of contents
 
-Para poder ejecutar este dashboard lo primero es descargar el código. Luego se puede ejecutar con Docker o sin él.
+- [Ejecución del código 🚂](#running-code)
+  - [Pre-requisitos 🛒](#pre-reqs)
+  - [Instalación 🎢](#installing)
+  - [Configuración ⚙](#configuring)
+  - [Ejecución 🎯](#running)
+- [Endpoints 🛎](#endpoints)
+- [Crear una API Key 🗝](#api-key)
 
-### Docker
+## Ejecución del código 🚂 <a name="running-code"></a>
 
-Símplemente levantar el docker-compose:
+Para poder ejecutar el backend desde el código fuente es necesario, lo primero, clonar el código e instalar las dependencias.
 
 ```
-docker-compose up --build
+git clone https://github.com/alesanmed-educational-projects/core-data-covid-project.git
+
+cd core-data-covid-project/backend
 ```
 
-### Local
+### Pre-requisitos 🛒 <a name="pre-reqs"></a>
+
+- [psycopg2](https://www.psycopg.org/install/)
+
+### Instalación 🎢 <a name="installing"></a>
 
 Primero hay que instalar las dependencias con:
 
@@ -30,13 +43,7 @@ O, si usas [Poetry](https://python-poetry.org/):
 poetry install
 ```
 
-Una vez las dependencias están instaladas, puedes ejecutar el servidor como tal:
-
-```
-FLASK_APP=covid-backend flask run
-```
-
-## Configuración
+### Configuración ⚙ <a name="configuring"></a>
 
 El proyecto se vale de las siguientes variables de entorno para su configuración:
 
@@ -47,71 +54,21 @@ El proyecto se vale de las siguientes variables de entorno para su configuració
 - POSTGRES_DB: Base de datos
 - SENDGRID_KEY: API Key de Sendgrid para mandar emails
 
-## Endpoints
+La clave API la puedes crear en la web de [Sendgrid](https://sendgrid.com/).
 
-### Autenticación
+### Ejecución 🎯 <a name="running"></a>
 
-Los endpoints marcados con `[A]` requieren autenticación. Para autenticarse, es necesario mandar un `Bearer Token` en la cabecera.
+Una vez las dependencias están instaladas, puedes ejecutar el servidor como tal:
 
-Ese token se puede generar como se explica [aquí](#api_key).
-
-### Endpoints
-
-Los endpoints que expone esta API son:
-
-`[A] POST /auth`
-
-Comprueba si una API key es válida. No admite cuerpo
-
-`GET /cases`
-
-Devuelve casos acorde a una serie de filtros opcionales. A saber:
-
-- `type`: Tipo de caso. Válidos `recovered`, `confirmed`, `dead`
-- `agg`: Campos por los que aggregar. Válidos `date`, `country`, `type`, `province`, `province_code`
-- `resultType`: Tipo de acumulación que se quiere. Válidos `cummulativeDate`, `cummulativeDateCountry`, `cummulativeCountry`, `cummulativeProvince`
-- `country`: País por el que filtrar
-- `province`: Provincia por la que filtrar
-- `date`: Fecha exacta para filtrar
-- `date[gte]`: Fecha límite por debajo para pedir datos
-- `date[lte]`: Fecha límite por arriba para pedir datos
-- `limit`: Máximo número de registros que devolver
-- `sort`: Campos por los que filtrar, en la forma `[field, -other]`
-- `normalize`: Si devolver la columna `amount` normalizada
-
-`GET /countries`
-
-Devuelve los países acorde a una serie de filtros opcionales. A saber:
-
-- `name`: Nombre del país
-- `near`: Latitud y longitud, separadas por comas. Los resultados saldrán ordenados acorde a la distancia del país a ese punto.
-
-`[A] POST /countries`
-
-Crea un país con los datos pasados en el cuerpo. El formato es JSON y todos los campos son obligatorios:
-
-```json
-{
-    "name": "Pais",
-    "alpha2": "PS",
-    "alpha3": "PAS",
-    "lat": "37.401875",
-    "lng": "-5.9890039"
-}
+```
+FLASK_APP=covid-backend flask run
 ```
 
-`GET /countries/:id/provinces`
+## Endpoints 🛎 <a name="endpoints"></a>
 
-Devuelve las provincias que pertenencen al país con la ID indicada
+Toda la información de los endpoints que expone esta API y sus parámetros se encuentra en el archivo [API.md](API.md)
 
-`POST /email`
-
-Envía un email con el PDF enviado en el POST. Debe ser un `form-data` con el PDF en `files` y el email del receptor en `recipient`.
-
-`GET /provinces`
-Devuelve todas las provincias
-
-## Crear una API Key <a name="api_key"></a>
+## Crear una API Key 🗝 <a name="api-key"></a>
 
 Para poder crear un país hace falta mandar una API Key en las cabeceras. Para generar esta clave se debe ejecutar el comando:
 
@@ -119,4 +76,4 @@ Para poder crear un país hace falta mandar una API Key en las cabeceras. Para g
 FLASK_APP=covid-backend flask create-api-key
 ```
 
-La API Key creada aparecerá en la consola.
+La API Key creada aparecerá en la consola y quedará guardada en la base de datos especificada en la configuración por variables de entorno
