@@ -1,6 +1,6 @@
 ![cabecera foto COVID](/assets/img/header.jpg!d)
 # Las cositas del COVID
-[![forthebadge made-with-python](https://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
+[![forthebadge made-with-python](assets/img/made-with-python.svg)](https://www.python.org/)
 
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
 [![forthebadge](/assets/img/built-with-sabrosura.svg)](https://forthebadge.com)
