@@ -1,23 +1,23 @@
 # COVID-backend
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
 
-Este proyecto contiene el backend de la aplicación. Aquí es donde ocurre toda la magia.
+This part holds the application backend. Here's where the magic happens 🏀.
 
-En el backend se usa el paquete [covid-data](https://pypi.org/project/covid-data/) para acceder a las queries para manejar y pedir datos a la base de datos.
+The backend relies on [covid-data](https://pypi.org/project/covid-data/) package to access the queries for managing and asking data to the database.
 
 # Table of contents
 
-- [Ejecución del código 🚂](#running-code)
-  - [Pre-requisitos 🛒](#pre-reqs)
-  - [Instalación 🎢](#installing)
-  - [Configuración ⚙](#configuring)
-  - [Ejecución 🎯](#running)
+- [Running the code 🚂](#running-code)
+  - [Pre-requisites 🛒](#pre-reqs)
+  - [Installation 🎢](#installing)
+  - [Configuration ⚙](#configuring)
+  - [Execution 🎯](#running)
 - [Endpoints 🛎](#endpoints)
-- [Crear una API Key 🗝](#api-key)
+- [Creating an API key 🗝](#api-key)
 
-## Ejecución del código 🚂 <a name="running-code"></a>
+## Running the code 🚂 <a name="running-code"></a>
 
-Para poder ejecutar el backend desde el código fuente es necesario, lo primero, clonar el código e instalar las dependencias.
+If you want to run the backend from source, clone it and install the dependencies.
 
 ```
 git clone https://github.com/alesanmed-educational-projects/core-data-covid-project.git
@@ -25,40 +25,40 @@ git clone https://github.com/alesanmed-educational-projects/core-data-covid-proj
 cd core-data-covid-project/backend
 ```
 
-### Pre-requisitos 🛒 <a name="pre-reqs"></a>
+### Pre-requisites 🛒 <a name="pre-reqs"></a>
 
 - [psycopg2](https://www.psycopg.org/install/)
 
-### Instalación 🎢 <a name="installing"></a>
+### Installation 🎢 <a name="installing"></a>
 
-Primero hay que instalar las dependencias con:
+First, install the dependencies using pip:
 
 ```
 pip install -r requirements.txt
 ```
 
-O, si usas [Poetry](https://python-poetry.org/):
+Or, if you use [Poetry](https://python-poetry.org/):
 
 ```
 poetry install
 ```
 
-### Configuración ⚙ <a name="configuring"></a>
+### Configuration ⚙ <a name="configuring"></a>
 
-El proyecto se vale de las siguientes variables de entorno para su configuración:
+The project looks for the following environment variables to configure several parts:
 
-- POSTGRES_USER: Usuario de Postgres
-- POSTGRES_PASS: Contraseña de Postgres
-- POSTGRES_HOST: Host de Postgres
-- POSTGRES_PORT: Puerto de Postgres
-- POSTGRES_DB: Base de datos
-- SENDGRID_KEY: API Key de Sendgrid para mandar emails
+- POSTGRES_USER: Postgres username
+- POSTGRES_PASS: Postgres password
+- POSTGRES_HOST: Postgres host
+- POSTGRES_PORT: Postgres port
+- POSTGRES_DB: Postgres database
+- SENDGRID_KEY: Sendgrid API key for sending emails
 
-La clave API la puedes crear en la web de [Sendgrid](https://sendgrid.com/).
+You can create a Sendgrid API key from their [website](https://sendgrid.com/).
 
-### Ejecución 🎯 <a name="running"></a>
+### Execution 🎯 <a name="running"></a>
 
-Una vez las dependencias están instaladas, puedes ejecutar el servidor como tal:
+Once you have installed the dependencies, you can bring the server up:
 
 ```
 FLASK_APP=covid-backend flask run
@@ -66,14 +66,14 @@ FLASK_APP=covid-backend flask run
 
 ## Endpoints 🛎 <a name="endpoints"></a>
 
-Toda la información de los endpoints que expone esta API y sus parámetros se encuentra en el archivo [API.md](API.md)
+All info about the API endpoints and the parameters accepted are in [API.md](API.md)
 
-## Crear una API Key 🗝 <a name="api-key"></a>
+## Creating an API key 🗝 <a name="api-key"></a>
 
-Para poder crear un país hace falta mandar una API Key en las cabeceras. Para generar esta clave se debe ejecutar el comando:
+To create a country, you have to send an API key in the request headers. To generate that API key, you can run the command:
 
 ```
 FLASK_APP=covid-backend flask create-api-key
 ```
 
-La API Key creada aparecerá en la consola y quedará guardada en la base de datos especificada en la configuración por variables de entorno
+The newly created API Key will show up in the terminal. Also, you can find it saved in the database configured via env variables.

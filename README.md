@@ -1,5 +1,5 @@
-![cabecera foto COVID](/assets/img/header.jpg!d)
-# Las cositas del COVID
+![header photo COVID](/assets/img/header.jpg!d)
+# COVID Stuff
 [![forthebadge made-with-python](assets/img/made-with-python.svg)](https://www.python.org/)
 
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
@@ -10,28 +10,27 @@
 ![Built with Python](https://img.shields.io/pypi/pyversions/covid-data)
 ![Deploy Badge](https://github.com/alesanmed-educational-projects/core-data-covid-project/actions/workflows/okteto_deploy.yml/badge.svg)
 
-Bienvenido a mi proyecto de data del bootcamp de [CORE](https://www.corecode.school/).
+Welcome to my Data project made in the context of [CORE School](https://www.corecode.school/).
 
-Este proyecto intenta cargar, procesar y mostrar ciertos datos relacionados con la COVID.
+This project is for loading, processing as well as showing several data related to COVID.
 
-### Puedes acceder al proyecto [aqui](https://frontend-alesanmed.cloud.okteto.net/)
+### You can play with the project [here](https://covid-data-alesanmed.cloud.okteto.net/)
 
 # Table of contents
 
-- [Las cositas del COVID](#las-cositas-del-covid)
-  - [División 💔](#division)
-    - [COVID-data 🤖](#covid-data)
-    - [COVID-backend 📡](#covid-backend)
-    - [COVID-dashboard ✨](#covid-dashboard)
-  - [Despliegue local 🔨🔧](#despliegue-local)
-    - [En Docker 🐳](#en-docker)
-    - [A partir del código fuente ⛲](#a-partir-del-codigo-fuente)
-  - [Datos usados 📚](#datos-usados)
-  - [Licencia](#licencia)
+- [Splitting 💔](#splitting)
+  - [COVID-data 🤖](#covid-data)
+  - [COVID-backend 📡](#covid-backend)
+  - [COVID-dashboard ✨](#covid-dashboard)
+- [Local deployment 🔨🔧](#local-deployment)
+  - [With Docker 🐳](#with-docker)
+  - [From source ⛲](#from-source)
+- [Dataset Used 📚](#data-used)
+- [License](#license)
 
-## División 💔 <a name="division"></a>
+## División 💔 <a name="splitting"></a>
 
-Este proyecto consta de varias partes, cada una con su propio README específico. Estas piezas son:
+This project is composed of several pieces, each of them with its README. Those pieces are:
 
 1. [covid-data](https://github.com/alesanmed-educational-projects/covid-data)
 2. [flask-backend](backend)
@@ -41,31 +40,31 @@ Este proyecto consta de varias partes, cada una con su propio README específico
 
 ![CLI usage](/assets/img/CLI.png)
 
-[covid-data](https://pypi.org/project/covid-data/) Es un paquete de Python que se encarga de toda la carga y acceso a los datos. Se usa como biblioteca en el backend para acceder a la base de datos almacenar todas las queries.
+[covid-data](https://pypi.org/project/covid-data/) is a Python package in charge of loading and accessing the data. The backend uses it for retrieving data from the Database. The library holds all the SQL queries needed (so far) for accessing the data.
 
-También se puede usar como CLI para cargar los datos en una base de datos nueva.
+It can also be used as a CLI to load the data in an empty database.
 
 ### COVID-backend 📡 <a name="covid-backend"></a>
 
-![Petición API en Postman](/assets/img/API_req.png)
+![Postman API request](/assets/img/API_req.png)
 
-El backend se compone de una aplicación en flask que expone una serie de endpoints para pedir datos de países y casos de COVID.
+The backend is made with Flask, exposing several endpoints to serve country and COVID cases data.
 
-Este backend lo usa el dashboard para pedir todos los datos necesarios.
+This backend serves all the necessary data to the Dashboard.
 
 ### COVID-dashboard ✨ <a name="covid-dashboard"></a>
 
 ![Dashboard image](/assets/img/dashboard.png)
 
-Por último, el frontend es una aplicación de Streamlit en la que se muestran gráficas de exploración y visualización de datos.
+Last but not least, the frontend is a Streamlit application with different plots to explore and visualize the data.
 
-Este frontend pide los datos al backend en flask y los vuelca en un panel interactivo.
+This application presents an interactive panel to the user. The data shown is asked to the backend.
 
-## Despliegue local 🔨🔧 <a name="despliegue-local"></a>
+## Despliegue local 🔨🔧 <a name="local-deployment"></a>
 
-### En Docker 🐳 <a name="en-docker"></a>
+### En Docker 🐳 <a name="with-docker"></a>
 
-Para desplegar este proyecto en Docker es tan sencillo como clonarte el código del proyecto y levantarlo con docker-compose.
+To deploy this project using Docker, you only have to clone the repository and bring it up with docker-compose.
 
 ```
 git clone https://github.com/alesanmed-educational-projects/core-data-covid-project.git
@@ -75,24 +74,27 @@ cd core-data-covid-project
 docker-compose up
 ```
 
-### A partir del código fuente ⛲ <a name="a-partir-del-codigo-fuente"></a>
+### From source ⛲ <a name="from-source"></a>
 
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/alesanmed-educational-projects/core-data-covid-project)
 
 
-Para eso te recomiendo que abras el proyecto con tu IDE favorito y sigas las instrucciones del README de cada pieza.
+If you want to take this path, I recommend:
+ 1. Clone the repository
+ 2. Open it in your favorite IDE
+ 3. Follow the steps in each part's README
 
-## Datos usados 📚 <a name="datos-usados"></a>
+## Dataset used 📚 <a name="data-used"></a>
 
-Se ha partido del Dataset [Time Series Data Covid-19 Global](https://www.kaggle.com/baguspurnama/covid-confirmed-global).
+I got the base data from [Time Series Data Covid-19 Global](https://www.kaggle.com/baguspurnama/covid-confirmed-global) dataset.
 
-Estos datos comprenden desde el enero de 2020 a julio de 2021. Para ampliar los datos con información más reciente (en España y Francia) se han usado datos obtenidos de:
+These data go from January 2020 until July 2021. For extending the information with more recent data (from Spain and France), I used the following data sources:
 
-- España: [Centro Nacional de Epidemiología](https://cnecovid.isciii.es/)
-- Francia: [Plateforme ouverte des données publiques françaises](https://www.data.gouv.fr/fr/)
+- Spain: [Centro Nacional de Epidemiología](https://cnecovid.isciii.es/)
+- France: [Plateforme ouverte des données publiques françaises](https://www.data.gouv.fr/fr/)
 
-Para enriquecer los datos y completar y normalizar las localizaciones, se ha usado [OpenCageData](https://opencagedata.com/)
+For enhancing the data with normalized locations, I used [OpenCageData](https://opencagedata.com/)
 
-## Licencia
+## License
 
 [The Unlicense](LICENSE)

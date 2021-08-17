@@ -1,61 +1,76 @@
-## Autenticación
+## Authentication
 
-Los endpoints marcados con `[A]` requieren autenticación. Para autenticarse, es necesario mandar un `Bearer Token` en la cabecera.
+The endpoints endingw with `[A]` require authentication. You have to send a `Bearer Token` with a valid API key in the headers.
 
-Ese token se puede generar como se explica en el [README](README.md#api-key).
+You can generate that key as explained in [README](README.md#api-key).
 
 ## Endpoints
 
-Los endpoints que expone esta API son:
+The endpoints exposed by this API are:
 
-`[A] POST /auth`
+```http
+POST /auth [A] 
+```
 
-Comprueba si una API key es válida. No admite cuerpo
+Checks whether the API key is valid or not.
 
-`GET /cases`
+```http
+GET /cases
+```
 
-Devuelve casos acorde a una serie de filtros opcionales. A saber:
+Returns COVID cases according to several filters:
 
-- `type`: Tipo de caso. Válidos `recovered`, `confirmed`, `dead`
-- `agg`: Campos por los que aggregar. Válidos `date`, `country`, `type`, `province`, `province_code`
-- `resultType`: Tipo de acumulación que se quiere. Válidos `cummulativeDate`, `cummulativeDateCountry`, `cummulativeCountry`, `cummulativeProvince`
-- `country`: País por el que filtrar
-- `province`: Provincia por la que filtrar
-- `date`: Fecha exacta para filtrar
-- `date[gte]`: Fecha límite por debajo para pedir datos
-- `date[lte]`: Fecha límite por arriba para pedir datos
-- `limit`: Máximo número de registros que devolver
-- `sort`: Campos por los que filtrar, en la forma `[field, -other]`
-- `normalize`: Si devolver la columna `amount` normalizada
+- `type`: Case type. Valids are `recovered`, `confirmed`, `dead`
+- `agg`: Aggregation fields. Valids are `date`, `country`, `type`, `province`, `province_code`
+- `resultType`: Accumulation type. Valids are `cummulativeDate`, `cummulativeDateCountry`, `cummulativeCountry`, `cummulativeProvince`
+- `country`: Only cases belonging to this country
+- `province`: Only cases belonging to this province
+- `date`: Only cases from this exact date
+- `date[gte]`: Only cases newer than this date
+- `date[lte]`: Only cases older than this date
+- `limit`: Max number of cases to return
+- `sort`: Fields to use for sorting, in shape `[field, -other]`
+- `normalize`: Whether to normalize the `amount` column or not
 
-`GET /countries`
+```http
+GET /countries
+```
 
-Devuelve los países acorde a una serie de filtros opcionales. A saber:
+Returns countries according several filters:
 
-- `name`: Nombre del país
-- `near`: Latitud y longitud, separadas por comas. Los resultados saldrán ordenados acorde a la distancia del país a ese punto.
+- `name`: Coutry name
+- `near`: Latitude and Longitude separated by comma. The results are sorted according to the distance to that point.
 
-`[A] POST /countries`
+```http
+POST /countries [A]
+```
 
-Crea un país con los datos pasados en el cuerpo. El formato es JSON y todos los campos son obligatorios:
+Creates a new country with the body data. The body has to be JSON with all fields required:
 
 ```json
 {
-    "name": "Pais",
-    "alpha2": "PS",
-    "alpha3": "PAS",
+    "name": "Country",
+    "alpha2": "CR",
+    "alpha3": "COU",
     "lat": "37.401875",
     "lng": "-5.9890039"
 }
 ```
 
-`GET /countries/:id/provinces`
+```http
+GET /countries/:id/provinces
+```
 
-Devuelve las provincias que pertenencen al país con la ID indicada
+Return the provinces (states) from the country with requested ID.
 
-`POST /email`
+```http
+POST /email
+```
 
-Envía un email con el PDF enviado en el POST. Debe ser un `form-data` con el PDF en `files` y el email del receptor en `recipient`.
+Sends an email with the PDF present in the body. It has to be a `form-data` with the PDF in `files` and the recipient email in `recipient`.
 
-`GET /provinces`
-Devuelve todas las provincias
+```http
+GET /provinces
+```
+
+Returns all provinces

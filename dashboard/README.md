@@ -2,32 +2,32 @@
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://frontend-alesanmed.cloud.okteto.net/)
 
-Este proyecto contiene el cuadro de mandos. Hecho con [Streamlit](https://streamlit.io/).
+This piece contains the dashboard. Made with [Streamlit](https://streamlit.io/).
 
 # Table of contents
 
-- [Algunas capturas 📸](#screenshots)
-- [Ejecución del código 🚂](#running-code)
-  - [Instalación 🎢](#installing)
-  - [Configuración ⚙](#configuring)
-  - [Ejecución 🎯](#running)
-- [Páginas](#pages)
+- [Some screenshots 📸](#screenshots)
+- [Running the code 🚂](#running-code)
+  - [Installation 🎢](#installing)
+  - [Configuration ⚙](#configuring)
+  - [Execution 🎯](#running)
+- [Pages](#pages)
   - [General data](#general-data)
   - [Country data](#country-data)
   - [Manage data](#manage-data)
 
-## Algunas capturas 📸 <a name="screenshots"></a>
-![Casos por provincia](assets/cases_by_province.png)
+## Some screenshots 📸 <a name="screenshots"></a>
+![Cases per province](assets/cases_by_province.png)
 
-![Mapa de España con información de casos](assets/provinces_contributions.png)
+![Spain map with cases info](assets/provinces_contributions.png)
 
-![Evolución de casos a lo largo del tiempo](../assets/img/dashboard.png)
+![Evolution of cases](../assets/img/dashboard.png)
 
-![Mapa del mundo con información de casos](assets/img/worldmap.png)
+![World map with cases info](assets/img/worldmap.png)
 
-## Ejecución del código 🚂 <a name="running-code"></a>
+## Running the code 🚂 <a name="running-code"></a>
 
-Para poder ejecutar el backend desde el código fuente es necesario, lo primero, clonar el código e instalar las dependencias.
+If you want to run the dashboard from source, clone it and install the dependencies.
 
 ```
 git clone https://github.com/alesanmed-educational-projects/core-data-covid-project.git
@@ -35,48 +35,48 @@ git clone https://github.com/alesanmed-educational-projects/core-data-covid-proj
 cd core-data-covid-project/dashboard
 ```
 
-### Instalación 🎢 <a name="installing"></a>
+### Installation 🎢 <a name="installing"></a>
 
-Primero hay que instalar las dependencias con:
+First, install the dependencies using pip:
 
 ```
 pip install -r requirements.txt
 ```
 
-O, si usas [Poetry](https://python-poetry.org/):
+Or, if you use [Poetry](https://python-poetry.org/):
 
 ```
 poetry install
 ```
 
-### Configuración ⚙ <a name="configuring"></a>
+### Configuration ⚙ <a name="configuring"></a>
 
-El proyecto se vale de las siguientes variables de entorno para su configuración:
+The project looks for the following environment variables to configure several parts:
 
 - BACK_URL: URL de la API de flask
 
-### Ejecución 🎯 <a name="running"></a>
+### Execution 🎯 <a name="running"></a>
 
-Una vez las dependencias están instaladas, puedes ejecutar el servidor de Streamlit con:
+Once you have installed the dependencies, you can bring the dashboard up:
 
 ```
 streamlit run app/main.py
 ```
 
-## Páginas <a name="pages"></a>
+## Pages <a name="pages"></a>
 
 ### General data <a name="general-data"></a>
 
-Contiene datos generales del coronavirus. Casos globales, gráficas globlales y por países y un mapa.
+This page shows general COVID data. You can find global cases, global charts as well as a map with rates per country.
 
-Se pueden filtrar los datos por países y por tipos, además de elegir el tipo de gráfica.
+You can also filter the data by countries and types, as well as the chart type.
 
 ### Country data <a name="country-data"></a>
 
-Contiene datos detallados por país. Se desglosan por provincias y se puede exportar a PDF y mandar ese PDF por email.
+This page is a per-country detailed page. It splits the data by provinces (states). You can export that page to PDF and also send it via email.
 
-De nuevo, se puede filtrar por provincias, tipo de caso y tipo de gráfica.
+Again, you can filter by provinces, case type, and chart type.
 
 ### Manage data <a name="manage-data"></a>
 
-Permite crear países nuevos usando un API key. Los países creados deberán estar disponibles inmediatamente.
+This page allows creating new countries using an API key. The created data should be available right away in the dashboard.
