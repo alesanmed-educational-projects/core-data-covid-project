@@ -10,6 +10,7 @@ from fpdf import FPDF
 from streamlit.delta_generator import DeltaGenerator
 from streamlit_bokeh_events import streamlit_bokeh_events
 
+from ..charts import bar_rank, evolution_by_type, map_cases_contribution
 from ..data import (
     get_abs_cases,
     get_all_provinces,
@@ -80,14 +81,14 @@ class CountryData(Page):
             self.create_pdf()
             self.pdf.cell(0, 10, title, 0, 1, "C")
 
-        cols: List[DeltaGenerator] = st.beta_columns((1, 3))
+        cols: List[DeltaGenerator] = st.columns((1, 3))
 
         min_date = get_min_date_data()
         max_date = get_max_date_data()
 
         date_title = "Date range"
 
-        dates: list[datetime] = cols[0].date_input(
+        dates: list[datetime] = cols[0].date_input(  # type: ignore
             date_title,
             min_value=min_date,
             max_value=max_date,
@@ -157,13 +158,13 @@ class CountryData(Page):
             self.pdf.set_font(*self.BODY_FONT)
             self.pdf.cell(0, 10, country_info["name"], 0, 1)
 
+        case_type = st.selectbox("Case type", ["confirmed", "recovered", "dead"], 0)
+
         if selected_country in TOPOJSON_MAP:
             source = self.get_topo(
                 TOPOJSON_MAP[selected_country]["url"],
                 TOPOJSON_MAP[selected_country]["property"],
             )
-
-            case_type = st.selectbox("Case type", ["confirmed", "recovered", "dead"], 0)
 
             contribution_title = f"States contribution rate to {case_type} cases"
 
@@ -173,31 +174,21 @@ class CountryData(Page):
                 dates[0], dates[1], selected_country, case_type
             )
 
-            # Layering and configuring the components
-            chart: alt.Chart = (
-                alt.Chart(source)
-                .mark_geoshape()
-                .encode(
-                    color="amount:Q",
-                    tooltip=[
+            st.altair_chart(
+                map_cases_contribution(
+                    source,
+                    country_cases,
+                    [
                         alt.Tooltip(
                             f"{TOPOJSON_MAP[selected_country]['show']}:N", title="State"
                         ),
                         alt.Tooltip("amount:Q", title="Amount rate", format=".2%"),
                     ],
-                )
-                .transform_lookup(
-                    lookup=TOPOJSON_MAP[selected_country]["key"],
-                    from_=alt.LookupData(
-                        country_cases,
-                        "province_code",
-                        ["amount"],
-                    ),
-                )
-                .properties(height=600)
+                    TOPOJSON_MAP[selected_country]["key"],
+                    "province_code",
+                ),
+                True,
             )
-
-            st.altair_chart(chart, True)
 
             if st.session_state.get("pdf_export", False):
                 img_name = "./assets/provinces_contributions.png"
@@ -209,7 +200,7 @@ class CountryData(Page):
                 self.pdf.cell(0, 10, country_info["name"], 0, 1)
                 self.pdf.image(img_name, w=180)
 
-        cols: List[DeltaGenerator] = st.beta_columns((1, 3))
+        cols: List[DeltaGenerator] = st.columns((1, 3))
 
         chart_type_title = "Chart type"
 
@@ -239,65 +230,27 @@ class CountryData(Page):
             for province in provinces if len(provinces) else all_provinces:
                 self.pdf.cell(0, 10, f"\t- {province}", 0, 1)
 
-        cols: List[DeltaGenerator] = st.beta_columns(2)
+        cols: List[DeltaGenerator] = st.columns(2)
 
         country_header_title = f"{selected_country} cases evolution"
         province_header_title = "Global cases by province"
 
         cols[0].header(country_header_title)
 
-        selection = alt.selection_multi(fields=["type"], bind="legend")
-
-        base_chart: alt.Chart = alt.Chart(province_cases).mark_line(point=False)
-
-        chart = (
-            base_chart.encode(
-                x="yearmonthdate(date):T",
-                y="amount:Q",
-                tooltip=["date:T", "amount:Q"],
-                color=alt.Color(
-                    "type:N",
-                    scale=alt.Scale(
-                        domain=["confirmed", "dead", "recovered"],
-                        range=["orange", "red", "green"],
-                    ),
-                ),
-            )
-            .transform_filter(selection)
-            .add_selection(selection)
-            .properties(height=500)
-        )
-
-        cols[0].altair_chart(chart, True)
+        cols[0].altair_chart(evolution_by_type(province_cases), True)
 
         if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
             self.pdf.cell(0, 20, country_header_title, 0, 1)
             self.pdf.image("./assets/country_evolution.png", w=180)
 
-        province_cases = get_global_cumm_cases_by_province(
-            dates[0], dates[1], country_info["alpha2"], provinces
+        rank_province_cases = get_global_cumm_cases_by_province(
+            dates[0], dates[1], country_info["alpha2"], provinces, case_type
         )
-
-        base_chart: alt.Chart = alt.Chart(province_cases)
 
         cols[1].header(province_header_title)
 
-        chart = (
-            base_chart.transform_aggregate(
-                sum_amount="sum(amount)", groupby=["province"]
-            )
-            .mark_bar()
-            .encode(
-                x="sum_amount:Q",
-                y=alt.Y("province:N", sort="-x"),
-                tooltip=["sum_amount:Q"],
-                color="province:N",
-            )
-            .properties(height=500)
-        )
-
-        cols[1].altair_chart(chart, True)
+        cols[1].altair_chart(bar_rank(rank_province_cases, "province", 500), True)
 
         if st.session_state.get("pdf_export", False):
             self.pdf.set_font(*self.SUBTITLE_FONT)
@@ -305,7 +258,7 @@ class CountryData(Page):
             self.pdf.image("./assets/cases_by_province.png", w=180)
             pdf_byes = self.pdf.output(dest="S").encode("latin-1")
             pdf_str = base64.b64encode(pdf_byes).decode()
-            cols: list[DeltaGenerator] = st.beta_columns((1, 3))
+            cols: list[DeltaGenerator] = st.columns((1, 3))
             cols[0].markdown(
                 (
                     '<a download="country_data.pdf" '
