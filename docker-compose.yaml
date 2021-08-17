@@ -12,7 +12,7 @@ services:
       - "data:/var/lib/postgresql/data"
     networks:
       - backend
-  backend:
+  covid-back:
     build: ./backend
     ports:
       - "5000:5000"
@@ -27,7 +27,7 @@ services:
     networks:
       - backend
       - frontend
-  frontend:
+  covid-data:
     build: ./dashboard
     ports:
       - "8501:8501"
