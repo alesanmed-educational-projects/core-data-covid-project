@@ -3,13 +3,15 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Optional
 
-from covid_data.db.queries import (get_cases_by_filters,
-                                   get_countries_id_by_alpha2,
-                                   get_cum_cases_by_country,
-                                   get_cum_cases_by_date,
-                                   get_cum_cases_by_date_country,
-                                   get_cum_cases_by_province,
-                                   get_province_by_name)
+from covid_data.db.queries import (
+    get_cases_by_filters,
+    get_countries_id_by_alpha2,
+    get_cum_cases_by_country,
+    get_cum_cases_by_date,
+    get_cum_cases_by_date_country,
+    get_cum_cases_by_province,
+    get_province_by_name,
+)
 from covid_data.types import Aggregations, CaseType
 from flask import Blueprint, request
 from flask.wrappers import Response
@@ -137,7 +139,7 @@ def get_cases():
         )
     elif result_type_fix:
         cases = get_cum_cases_by_country(
-            db, date, date_lte, date_gte, case_type_fix, countries_id
+            db, date, date_lte, date_gte, case_type_fix, countries_id, limit
         )
     else:
         cases = get_cases_by_filters(
@@ -153,7 +155,7 @@ def get_cases():
             args.get("sort", []),
         )
 
-    if args.get("normalize", None):
+    if len(cases) and args.get("normalize", None):
         cases = normalize_json_col(cases, "amount")
 
     return Response(

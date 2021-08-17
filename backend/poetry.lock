@@ -110,7 +110,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "covid-data"
-version = "0.1.19"
+version = "0.1.21"
 description = "Data loader part of the mid-project for the Data Science bootcamp from Core Code School"
 category = "main"
 optional = false
@@ -524,7 +524,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5d3cf5545be117b26122236140452b9a2ef84ebee54650e8c5a98227bda579c6"
+content-hash = "e18aa2c6ff982aa92be63dd2428e3000d1ebca9588fbf07de248b2b8609f2e5d"
 
 [metadata.files]
 appdirs = [
@@ -565,8 +565,8 @@ colorama = [
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
 ]
 covid-data = [
-    {file = "covid_data-0.1.19-py3-none-any.whl", hash = "sha256:58bd9cf218188b889c7ca8c4cd0bb2a73386f55eb839cbaad11d516ae2994e7a"},
-    {file = "covid_data-0.1.19.tar.gz", hash = "sha256:dba5a656ec6f83847fc4f1af89f7277416279b8fe48aba39d9744fd90fb4eaf7"},
+    {file = "covid_data-0.1.21-py3-none-any.whl", hash = "sha256:06c8f813f3d99990af5b9d7228ca073d8fe38ab663e46784443689f176674f7c"},
+    {file = "covid_data-0.1.21.tar.gz", hash = "sha256:65195dc13d6ab577318a4586b828b0e6db95f75adef75cb9f11cc3dccd3fa988"},
 ]
 flake8 = [
     {file = "flake8-3.9.2-py2.py3-none-any.whl", hash = "sha256:bf8fd333346d844f616e8d47905ef3a3384edae6b4e9beb0c5101e25e3110907"},
