@@ -98,7 +98,7 @@ class GeneralData(Page):
                 "Top N countries",
                 0,
                 len(countries) or len(all_countries),
-                len(countries) or 30,
+                len(countries) or min(len(all_countries), 30),
             )
             or len(countries)
             or len(all_countries)
